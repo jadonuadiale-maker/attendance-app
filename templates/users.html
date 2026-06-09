@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<h1>All Users</h1>
+
+<ul class="list-group">
+    {% for user in users %}
+        <li class="list-group-item">
+            {{ user.id }} - {{ user.name}}
+        </li>
+    {% endfor %}
+</ul>
+
+<form action="/add_user" method="POST" class="mt-4">
+    <div class="mb-3">
+        <label for="username" class="form-label">Name</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+    </div>
+    <button type="submit" class="btn btn-success">Add User</button>
+</form>
+{% endblock %}
