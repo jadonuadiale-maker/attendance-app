@@ -8,18 +8,18 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>User</th>
-            <th>Date</th>
-            <th>Status</th>
+            <th class="bg-light">User</th>
+            <th class="bg-light">Date</th>
+            <th class="bg-ligth">Status</th>
         </tr>
     </thead>
 
     <tbody>
         {% for record in records %}
         <tr>
-            <td>{{ record.user_id }}</td>
-            <td>{{ record.date }}</td>
-            <td>{{ record.status }}</td>
+            <td class="bg-light">{{ record.user_id }}</td>
+            <td class="bg-light">{{ record.date }}</td>
+            <td class="bg-light">{{ record.status }}</td>
         </tr>
         {% endfor %}
     </tbody>

@@ -24,7 +24,7 @@ def mark_attendance(user_id, status):
     record = AttendanceRecord(user_id=user_id, date=date.today(), status=status)
     db.session.add(record)
     db.session.commit()
-    return f"Attendance marked: {status}"
+    return redirect('/attendance')
 
 @app.route('/users')
 def users():
