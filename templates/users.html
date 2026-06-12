@@ -17,11 +17,11 @@
     {% endfor %}
 </ul>
 
-<form action="/add_user" method="POST" class="mt-4">
+<form action="/add_user" method="POST" class="p-3 mt-4 mb-4 bg-light rounded">
     <div class="mb-3">
-        <label for="username" class="form-label">Name</label>
-        <input type="text" class="form-control" id="username" name="username" required>
+        <label for="name" class="form-label">Student Name</label>
+        <input type="text" class="form-control" id="name" name="name" placeholder="Enter a student name" required>
     </div>
-    <button type="submit" class="btn btn-success">Add User</button>
+    <button type="submit" class="btn btn-primary">Add Student</button>
 </form>
 {% endblock %}
