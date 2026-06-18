@@ -36,5 +36,13 @@ def attendance():
     records = AttendanceRecord.query.all()
     return render_template('attendance.html', records=records)
 
+@app.route('/delete_user/<int:id>', methods=['POST'])
+def delete_user(id):
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect('/attendance')
+
+
 if __name__ == '__main__':
     app.run(debug=True)

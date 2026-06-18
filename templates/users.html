@@ -12,6 +12,10 @@
             <div>
                 <a href="/mark/{{ user.id }}/Present" class="btn btn-sm btn-success me-2">Mark Present</a>
                 <a href="/mark/{{ user.id }}/Absent" class="btn btn-sm btn-danger">Mark Absent</a>
+
+                <form action="/delete_user/{{ user.id }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-warning">Delete User</button>
+                </form>
             </div>
         </li>
     {% endfor %}
