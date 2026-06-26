@@ -5,19 +5,63 @@ It solves the challenges of manual attendance recording, inconsistent tracking, 
 This project is part of my Summer Mastery Framework (SMF) and represents the foundation month’s capstone system before moving into full‑scale development.
 
 # 🎯 Purpose
-Churches often struggle with:
+## 📲 How the App Improves the Current Attendance Workflow
+Church attendance today is often recorded manually on paper. Members write their names beside the service they attend, newcomers add their details at the bottom of the sheet, and teachers later send attendance updates in group chats. This process is familiar, but slow, inconsistent, and requires repeated manual entry.
 
-inconsistent attendance records
+The Attendance App modernises this workflow while keeping the core structure intact.
 
-manual paper‑based tracking
+## 🧍‍♂️ Existing Members — Fast Digital Check‑In
+Instead of writing their names on paper, existing members check in using a tablet or iPad at the door.
 
-no central dashboard for insights
+- They type the first few letters of their name
+- The system autocompletes from the database
+- They select their profile
+- They mark whether they are attending 1st service or 2nd service
+- Their attendance is instantly recorded for the current session 
+- This mirrors the current process but removes handwriting, errors, and manual updates.
 
-difficulty managing multiple classes (children, teens, adults)
+## 🆕 Newcomers — Seamless Onboarding
+Newcomers no longer write their details at the bottom of a sheet.
 
-no way to track trends or member engagement
+- They tap “New Member”
+- Enter their basic information
+- They are automatically added to the correct class group
+- Their attendance for that day is recorded immediately
+- This eliminates the need for later data entry.
 
-This app provides a modern, automated solution.
+## 🗓️ Sessions — Automated but Editable
+The system automatically creates sessions for each class group based on the service schedule.
+Teachers and admins can:
+
+- view today’s session instantly
+- see who has checked in
+- manually mark late arrivals or absences
+- delete or modify sessions in exceptional cases (e.g., class cancelled, combined service)
+- This replaces the need for teachers to send attendance updates in group chats.
+
+## 👩‍🏫 Teacher & Admin Control
+Although the system automates most of the workflow, teachers and admins retain full control:
+
+- override attendance
+- correct mistakes
+- delete sessions
+- add special sessions
+- update class group membership
+
+Automation handles the routine; humans handle the exceptions.
+
+## 📈 Why This Matters
+This design:
+
+- mirrors the familiar paper workflow
+- removes double entry
+- reduces errors
+- speeds up check‑in
+- centralises attendance data
+- supports real‑time dashboards
+- scales across ministries and campuses
+
+It is a direct technological evolution of the current system — not a replacement of the workflow, but an upgrade of it.
 
 # 🚀 Core Features (Current + Planned)
 ## ✅ Current Foundation Features
