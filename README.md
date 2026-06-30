@@ -127,6 +127,11 @@ Frontend: HTML, Bootstrap
 Templating: Jinja2
 Version Control: Git + GitHub
 
+## Project Reset (June 30 2026)
+This version begins the structured rebuild of the Attendance App. 
+- Focus: Flask routing layer (ClassGroups, Sessions, AttendanceRecords)
+Legacey prototype archived in branch: 'prototype-v1'.
+
 # 📅 Development Roadmap
 ## Month 1 (Foundation) — Completed
 - Flask basics
