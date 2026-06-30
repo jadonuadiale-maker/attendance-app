@@ -2,10 +2,12 @@ from flask import Flask, render_template, request, redirect
 from datetime import date
 from extensions import db
 from models import User, AttendanceRecord
+from routes.classgroups import classgroups_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
 db.init_app(app)
+app.register_blueprint(classgroups_bp)
 
 @app.route('/')
 def home():
