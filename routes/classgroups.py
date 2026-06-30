@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify, request  # Blueprint: gorups related routes, jsonify: converts python data to JSON HTTP responses.
-from extensions import db                      # request: gives access to incoming HTTP request data, db: SQLAlchemy database instance. 
+from flask import Blueprint, jsonify, request  # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data.
+from extensions import db                      # db: SQLAlchemy database instance. 
 from models import ClassGroup                  # model representing a class group(e.g. 2-6, Teens).
 
 # These imports connect Flask's routing tools, my database layer, and the 
