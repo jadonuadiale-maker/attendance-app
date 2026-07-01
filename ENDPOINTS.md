@@ -7,8 +7,8 @@ Base URL: `http://127.0.0.1:5000`
 |---------|-----------|--------------|---------------|-----------|
 | GET | /classgroups | Get all class groups | — | List of class groups |
 | POST | /classgroups | Create a class group | {"name": "Teens"} | Created group |
-| GET | /classgroups/<id> | Get single class group | — | Group details |
-| DELETE | /classgroups/<id> | Delete class group | — | {"message": "Deleted"} |
+| GET | /classgroups/`<id>` | Get single class group | — | Group details |
+| DELETE | /classgroups/`<id>` | Delete class group | — | {"message": "Deleted"} |
 
 ## Sessions
 | Method | Endpoint | Description | Request Body | Response |
