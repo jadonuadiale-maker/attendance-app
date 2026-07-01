@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect
+from flask_migrate import Migrate
 from datetime import date
 from extensions import db
 from models import User, AttendanceRecord
@@ -10,6 +11,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
 db.init_app(app)
 app.register_blueprint(classgroups_bp)
 app.register_blueprint(sessions_bp)
+migarte = Migrate(app, db)
 
 @app.route('/')
 def home():

@@ -8,7 +8,7 @@ from models import ClassGroup                  # model representing a class grou
 classgroups_bp = Blueprint('classgroups', __name__)   # Creates a blueprint named "classgroups"
 
 # Get all class groups.
-@classgroups_bp.route("/classgorups", methods=["GET"]) # route.
+@classgroups_bp.route("/classgroups", methods=["GET"]) # route.
 def get_classgroups():
     groups = ClassGroup.query.all()                    # fetches all class groups from the database. 
     return jsonify([g.to_dict() for g in groups])      # coverts each model instance into a serializable dict.
@@ -33,5 +33,5 @@ def get_classgroup(id):
 def delete_classgroup(id):
     group = ClassGroup.query.get_or_404(id)                        # ensures we only attempt to delte an existing group.
     db.session.delete(group)                                       # marks the object for deletion.
-    db.sesion.commit()                                             # applies the deletion to the database.
+    db.session.commit()                                             # applies the deletion to the database.
     return jsonify({"message": "Deleted"})                         # Simple JSON confirmation message.
