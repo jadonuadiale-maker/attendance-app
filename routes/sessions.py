@@ -7,6 +7,12 @@ from models import Session                     # model representing an individua
 
 sessions_bp = Blueprint('sessions', __name__)   # Creates a blueprint named "sessions"
 
+# Simple session overview route.
+@sessions_bp.route("/sessions", methods=["GET"])
+def sessions_overview():
+    sessions = Session.query.all()
+    return jsonify([s.to_dict() for s in sessions])
+
 # GET all sessions for a class group.
 @sessions_bp.route("/classgroups/<int:group_id>/sessions", methods=["GET"]) # defines an endpoint that retrieves all sessions to a specific class group.
 def get_sessions(group_id):

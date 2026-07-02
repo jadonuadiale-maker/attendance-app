@@ -7,11 +7,19 @@ from models import ClassGroup                  # model representing a class grou
 
 classgroups_bp = Blueprint('classgroups', __name__)   # Creates a blueprint named "classgroups"
 
-# Get all class groups.
+# GET all class groups.
+
+# Existing API route.
 @classgroups_bp.route("/classgroups", methods=["GET"]) # route.
 def get_classgroups():
     groups = ClassGroup.query.all()                    # fetches all class groups from the database. 
     return jsonify([g.to_dict() for g in groups])      # coverts each model instance into a serializable dict.
+
+# New frontend route.
+@classgroups_bp.route("/classes", methods=["GET"])
+def index():
+    groups = ClassGroup.query.all()
+    return jsonify([g.to_dict() for g in groups])
 
 # POST create class group. 
 @classgroups_bp.route("/classgroups", methods=["POST"]) # route. 

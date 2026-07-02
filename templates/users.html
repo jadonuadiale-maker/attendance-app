@@ -3,29 +3,40 @@
 {% block title %}Users{% endblock %}
 
 {% block content %}
-<h1>All Users</h1>
+<!-- Page heading -->
+ <h1 class="mb-4">Users</h1>
 
-<ul class="list-group">
-    {% for user in users %}
-        <li class="list-group-item bg-light d-flex justify-content-between align-items-center">
-            <span>{{ user.id }} - {{ user.name}}</span>
-            <div>
-                <a href="/mark/{{ user.id }}/Present" class="btn btn-sm btn-success me-2">Mark Present</a>
-                <a href="/mark/{{ user.id }}/Absent" class="btn btn-sm btn-danger">Mark Absent</a>
-
-                <form action="/delete_user/{{ user.id }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-warning">Delete User</button>
-                </form>
-            </div>
-        </li>
-    {% endfor %}
-</ul>
-
-<form action="/add_user" method="POST" class="p-3 mt-4 mb-4 bg-light rounded">
-    <div class="mb-3">
-        <label for="name" class="form-label">Student Name</label>
-        <input type="text" class="form-control" id="name" name="name" placeholder="Enter a student name" required>
+<!-- Add User form -->
+ <form action="{{ url_for('add_user') }}" method="POST" class="mb-4">
+    <div class="input-group">
+        <!-- Username input -->
+         <input type="text" name="username" class="form-control" placeholder="Enter user name" required>
+         <!-- Submit button -->
+        <button class="btn btn-success" type="submit">Add User</button>
     </div>
-    <button type="submit" class="btn btn-primary">Add Student</button>
-</form>
-{% endblock %}
+ </form>
+
+ <!-- Users table -->
+  <table class="table table-striped table-bordered">
+    <thead class="table-success">
+        <tr>
+            <th>Name</th>
+            <th style="width: 120px;">Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <!-- Loop through all users -->
+         {% for user in users %}
+         <tr>
+            <td>
+                <!-- Delete user form -->
+                 <form action="{{ url_for('delete_user', id=user.id) }}" method="POST">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                 </form>
+            </td>
+         </tr>
+         {% endfor %}
+    </tbody>
+  </table>
+  {% endblock %}
