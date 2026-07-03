@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request  # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data.
+from flask import Blueprint, jsonify, request, render_template, url_for, redirect # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: for html page view. 
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import Session                     # model representing an individual teaching session belonging to a class group.
 
@@ -13,15 +13,39 @@ def sessions_overview():
     sessions = Session.query.all()
     return jsonify([s.to_dict() for s in sessions])
 
+# Session overview route for HTML page. 
+@sessions_bp.route('/sessions/view', methods=['GET'])
+def sessions():
+    from models import ClassGroup
+    groups = ClassGroup.query.all()
+    sessions = Session.query.all()
+    return render_template('sessions.html', sessions=sessions, groups=groups)
+
 # GET all sessions for a class group.
 @sessions_bp.route("/classgroups/<int:group_id>/sessions", methods=["GET"]) # defines an endpoint that retrieves all sessions to a specific class group.
 def get_sessions(group_id):
     sessions = Session.query.filter_by(classgroup_id=group_id).all() # queries the database for all session objects whose classgroup_id matches the given group.
     return jsonify([s.to_dict() for s in sessions])                 # converts each session model instance into a JSON-safe dictionary.
 
-# POST create a sessoin for a class group. 
+# POST create a session for a class group. 
+
+# For HTML view.
+@sessions_bp.route('/sessions/create', methods=['POST'])
+def create_session_html():
+    data = request.form
+    group_id = data.get('group_id')
+    session = Session(
+        classgroup_id=group_id,
+        date=data['date'],
+        topic=data.get('topic')
+    )
+    db.session.add(session)
+    db.session.commit()
+    return redirect(url_for('sessions.sessions'))
+
+# For API testing.
 @sessions_bp.route("/classgroups/<int:group_id>/sessions", methods=["POST"]) # endpoint for creating a new session under a specif class group .
-def create_session(group_id):
+def create_session_api(group_id):
     data = request.json                                              # reads the JSON payload sent by the client. 
     session = Session(
         classgroup_id=group_id,   # taken from the URL

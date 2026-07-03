@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Sessions{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Sessions</h1>
+
+<!-- Add Session form -->
+<form action="{{ url_for('sessions.create_session_html') }}" method="POST" class="mb-4">
+  <div class="row g-2">
+    <div class="col-md-4">
+      <select name="group_id" class="form-select" required>
+        {% for group in groups %}
+          <option value="{{ group.id }}">{{ group.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <input type="date" name="date" class="form-control" required>
+    </div>
+    <div class="col-md-4">
+      <input type="text" name="topic" class="form-control" placeholder="Enter session topic" required>
+    </div>
+    <div class="col-md-4">
+      <button class="btn btn-success w-100" type="submit">Add Session</button>
+    </div>
+  </div>
+</form>
+
+
+<!-- Sessions table -->
+<table class="table table-striped table-bordered">
+  <thead class="table-success">
+    <tr>
+      <th>Class Group</th>
+      <th>Date</th>
+      <th>Topic</th>
+      <th style="width: 120px;">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for session in sessions %}
+    <tr>
+      <td>{{ session.classgroup_id }}</td>
+      <td>{{ session.date }}</td>
+      <td>{{ session.topic }}</td>
+      <td>
+        <form action="{{ url_for('sessions.get_session', id=session.id) }}" method="GET">
+          <button class="btn btn-primary btn-sm">View</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

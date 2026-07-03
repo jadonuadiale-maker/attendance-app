@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request  # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data.
+from flask import Blueprint, jsonify, request, render_template  # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: to view html page. 
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import ClassGroup                  # model representing a class group(e.g. 2-6, Teens).
 
@@ -8,6 +8,12 @@ from models import ClassGroup                  # model representing a class grou
 classgroups_bp = Blueprint('classgroups', __name__)   # Creates a blueprint named "classgroups"
 
 # GET all class groups.
+
+# List all Class Groups for HTML page view.
+@classgroups_bp.route('/classes/view')
+def classes():
+    groups = ClassGroup.query.all()
+    return render_template('classes.html', groups=groups)
 
 # Existing API route.
 @classgroups_bp.route("/classgroups", methods=["GET"]) # route.
