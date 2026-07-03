@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, render_template  # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: to view html page. 
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for  # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: to view html page. 
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import ClassGroup                  # model representing a class group(e.g. 2-6, Teens).
 
@@ -27,9 +27,20 @@ def index():
     groups = ClassGroup.query.all()
     return jsonify([g.to_dict() for g in groups])
 
-# POST create class group. 
+# POST create class group.
+
+# For HTML view.
+@classgroups_bp.route("/classgroups/create", methods=["POST"])
+def create_classgroup_html():
+    data = request.form
+    group = ClassGroup(name=data["name"])
+    db.session.add(group)
+    db.session.commit()
+    return redirect(url_for('classgroups.classes'))
+
+# For API testing. 
 @classgroups_bp.route("/classgroups", methods=["POST"]) # route. 
-def create_classgroup():
+def create_classgroup_api():
     data = request.json                                 # reads the JSON body sent by the client. 
     group = ClassGroup(name=data["name"])               # creates a new class group using the provided name. 
     db.session.add(group)                               # db.session.add(...) + db.session.commit(): persists the new group to the database. 

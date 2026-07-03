@@ -57,6 +57,15 @@ def create_session_api(group_id):
     return jsonify(session.to_dict()), 201                           # returns the newly created session with HTTP status 201 created. 
 
 # GET a single session. 
+
+# For HTML view. 
+@sessions_bp.route("/sessions/<int:id>/view", methods=["GET"])
+def view_session(id):
+    session = Session.query.get_or_404(id)
+    return render_template("session_detail.html", session=session)
+
+
+# For API testing
 @sessions_bp.route("/sessions/<int:id>", methods=["GET"]) # endpoint to fethc a single session by its ID.
 def get_session(id):
     session = Session.query.get_or_404(id)        # attemps to retrieve the session, if not found, automatically return a 404 error.
