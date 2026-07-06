@@ -54,6 +54,13 @@ def attendance():
     records = AttendanceRecord.query.all()
     return render_template('attendance.html', records=records)
 
+# AUTOCOMPLETE USERS SEARCH.
+@app.route("/users/search")
+def search_users():
+    q = request.args.get("q", "")
+    users = User.query.filter(User.name.ilike(f"%{q}%")).all()
+    return jsonify([u.to_dict() for u in users])
+
 # APP RUNNER.
 if __name__ == '__main__':
     app.run(debug=True)

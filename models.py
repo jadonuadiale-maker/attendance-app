@@ -61,6 +61,7 @@ class AttendanceRecord(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(10), nullable=False)
+    session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"))
 
     def to_dict(self):
         return {
@@ -68,4 +69,5 @@ class AttendanceRecord(db.Model):
             "user_id": self.user_id,
             "date": self.date.isoformat(),
             "status": self.status,
+            "session_id": self.sesion_id
         }

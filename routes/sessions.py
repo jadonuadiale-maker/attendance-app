@@ -27,7 +27,7 @@ def get_sessions(group_id):
     sessions = Session.query.filter_by(classgroup_id=group_id).all() # queries the database for all session objects whose classgroup_id matches the given group.
     return jsonify([s.to_dict() for s in sessions])                 # converts each session model instance into a JSON-safe dictionary.
 
-# POST create a session for a class group. 
+# POST CREATE A SESSION FOR A CLASS GROUP. 
 
 # For HTML view.
 @sessions_bp.route('/sessions/create', methods=['POST'])
@@ -55,6 +55,14 @@ def create_session_api(group_id):
     db.session.add(session)                                          # adds the new session to the database session. 
     db.session.commit()                                              # saves it permanently.
     return jsonify(session.to_dict()), 201                           # returns the newly created session with HTTP status 201 created. 
+
+# For Auto-Creation.
+@sessions_bp.route("/sessions/auto_create", methods=["POST"])
+def auto_create():
+    created = auto_create_sessions()   # Only daily logic is needed. 
+    return jsonify({
+        "created_sessions": [s.to_dict() for s in created]
+        }), 201
 
 # GET a single session. 
 
