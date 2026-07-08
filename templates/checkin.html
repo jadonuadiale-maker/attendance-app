@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Check-In{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">User Check-In</h1>
+
+<!-- Hidden field for session ID -->
+<input type="hidden" id="session-id" value="{{ session_id }}">
+
+<!-- Autocomplete input -->
+<input id="user-search" class="form-control" placeholder="Type your name">
+
+<!-- Dropdown results -->
+<ul id="results" class="list-group mt-2"></ul>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Internal commentary: 
+// - On keyup, call backend search endpoint.
+// - Render list of matching users.
+// - On click, send POST to check-in route.
+
+document.getElementById("user-search").addEventListener("keyup", async (e) => {
+    const q = e.target.value;
+    if (!q) return;
+
+    const res = await fetch(`/users/search?q=${q}`);
+    const users = await res.json();
+
+    const list = document.getElementById("results");
+    list.innerHTML = "";
+
+    users.forEach(u => {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.textContent = u.name;
+        li.onclick = () => checkIn(u.id);
+        list.appendChild(li);
+    });
+});
+
+async function checkIn(userId) {
+    const sessionId = document.getElementById("session-id").value;
+    const res = await fetch(`/sessions/${sessionId}/checkin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId })
+    });
+
+    const data = await res.json();
+    alert(data.message || data.error);
+}
+
+</script>
+{% endblock %}

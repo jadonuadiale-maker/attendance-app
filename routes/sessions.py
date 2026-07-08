@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, render_template, url_for, redirect # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: for html page view. 
 from extensions import db                      # db: SQLAlchemy database instance. 
-from models import Session                     # model representing an individual teaching session belonging to a class group.
+from models import AttendanceRecord, User, Session                     # model representing an individual teaching session belonging to a class group.
+from datetime import date
 
 # These imports connect Flask's routing tooks, the database layer, and the Session model.
 # Together, they allow this file to act as the dedicated API surface for session operations. 
@@ -78,3 +79,47 @@ def view_session(id):
 def get_session(id):
     session = Session.query.get_or_404(id)        # attemps to retrieve the session, if not found, automatically return a 404 error.
     return jsonify(session.to_dict())             # returns the session as JSON.
+
+# For check-in. 
+@sessions_bp.route("/sessions/<int:session_id>/checkin", methods=["POST"])
+def checkin (session_id):
+    data = request.json
+    user_id = data.get("user_id")
+
+    # Validate session.
+    session = Session.query.get(session_id)
+    if not session:
+        return jsonify({"error": "Session not found"}), 404
+    
+    # Validate user.
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    # Prevent duplicate check-in. 
+    existing = AttendanceRecord.query.filter_by(
+        user_id=user_id,
+        session_id=session_id
+    ).first()
+
+    if existing:
+        return jsonify({"error": "User already checked in"}), 400
+    
+    # Create attendance record. 
+    record = AttendanceRecord(
+        user_id=user_id,
+        session_id=session_id,
+        date=date.today(),
+        status="present"
+    )
+
+    db.session.add(record)
+    db.session.commit()
+
+    return jsonify({"message": "Check-in successful"}), 201
+
+# Check-in page. 
+@sessions_bp.route("/sessions/<int:id>/checkin/view", methods=["GET"])
+def checkin_view(id):
+    session = Session.query.get_or_404(id)
+    return render_template("checkin.html", session_id=id, session=session)
