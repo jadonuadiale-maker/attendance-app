@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+instance/
+attendance.db
+migrations/__pycache__/

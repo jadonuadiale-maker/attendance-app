@@ -13,6 +13,8 @@
             <th>User</th>
             <th>Session</th>
             <th>Date</th>
+            <th>Service</th>
+            <th>Status</th>
         </tr>
     </thead>
 
@@ -20,10 +22,12 @@
         <!-- Loop through attendance records -->
         {% for record in records %}
         <tr>
-            <!-- Display related user, session, and date -->
-            <td>{{ record.user.name }}</td>
+            <!-- Display related user, session, date, and service number -->
+            <td>{{ record.user.full_name }}</td>
             <td>{{ record.session.topic }}</td>
             <td>{{ record.date }}</td>
+            <td>{{ record.service_number }}</td>
+            <td>{{ record.status }}</td>
         </tr>
         {% endfor %}
     </tbody>

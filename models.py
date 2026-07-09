@@ -5,13 +5,23 @@ from extensions import db
 # Currently used by prototype routes for attendance tracking.
 # Will later be integrated with class groups or sessions. 
 class User(db.Model):
+    __tablename__ = "user"
+
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    surname = db.Column(db.String(100), nullable=False)
+    full_name = db.Column(db.String(200), nullable=False)
+    date_of_birth = db.Column(db.Date)
+    date_joined = db.Column(db.Date, nullable=False)
 
     def to_dict(self):
         return {
-            "id": self.id, 
-            "name": self.name
+            "id": self.id,
+            "first_name": self.first_name,
+            "surname": self.surname,
+            "full_name": self.full_name,
+            "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
+            "date_joined": self.date_joined.isoformat()
         }
 
 # CLASS GROUP MODEL.
@@ -62,6 +72,9 @@ class AttendanceRecord(db.Model):
     date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(10), nullable=False)
     session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"))
+    # New field: service_number (1, 2, or 3 for "both")
+    service_number = db.Column(db.Integer, nullable=False)
+
     user = db.relationship("User", backref="attendance_records")
     session = db.relationship("Session", backref="attendance_records")
 
@@ -72,5 +85,6 @@ class AttendanceRecord(db.Model):
             "user_id": self.user_id,
             "date": self.date.isoformat(),
             "status": self.status,
-            "session_id": self.session_id
+            "session_id": self.session_id,
+            "service_number": self.service_number, # New field in dict. 
         }

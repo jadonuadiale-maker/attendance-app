@@ -5,6 +5,7 @@ from extensions import db
 from models import *
 from routes.classgroups import classgroups_bp
 from routes.sessions import sessions_bp
+from routes.users import users_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
@@ -17,6 +18,7 @@ migrate = Migrate(app, db)
 # separate blueprints foir cleaner structure.
 app.register_blueprint(classgroups_bp)
 app.register_blueprint(sessions_bp)
+app.register_blueprint(users_bp)
 
 # DASHBOARD ROUTE (Main Landing Page).
 @app.route('/')
@@ -58,7 +60,7 @@ def attendance():
 @app.route("/users/search")
 def search_users():
     q = request.args.get("q", "")
-    users = User.query.filter(User.name.ilike(f"%{q}%")).all()
+    users = User.query.filter(User.full_name.ilike(f"%{q}%")).all()
     return jsonify([u.to_dict() for u in users])
 
 # APP RUNNER.

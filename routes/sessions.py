@@ -85,6 +85,7 @@ def get_session(id):
 def checkin (session_id):
     data = request.json
     user_id = data.get("user_id")
+    service_number = data.get("service_number") # 1, 2, or 3 ("both")
 
     # Validate session.
     session = Session.query.get(session_id)
@@ -96,10 +97,15 @@ def checkin (session_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
     
-    # Prevent duplicate check-in. 
+    # Validate service_number.
+    if service_number not in [1, 2, 3]:
+        return jsonify({"error": "Invalid service number"}), 400
+    
+    # Prevent duplicate check-in per service. 
     existing = AttendanceRecord.query.filter_by(
         user_id=user_id,
-        session_id=session_id
+        session_id=session_id,
+        service_number=service_number
     ).first()
 
     if existing:
@@ -110,7 +116,8 @@ def checkin (session_id):
         user_id=user_id,
         session_id=session_id,
         date=date.today(),
-        status="present"
+        status="present",
+        service_number=service_number
     )
 
     db.session.add(record)
@@ -122,4 +129,43 @@ def checkin (session_id):
 @sessions_bp.route("/sessions/<int:id>/checkin/view", methods=["GET"])
 def checkin_view(id):
     session = Session.query.get_or_404(id)
-    return render_template("checkin.html", session_id=id, session=session)
+    users = User.query.order_by(User.full_name.asc()).all()
+    return render_template("checkin.html", session_id=id, session=session, users=users)
+
+# Check-in detail page (UI flow).
+@sessions_bp.route("/checkin/<int:user_id>/<int:session_id>")
+def checkin_detail(user_id, session_id):
+    user = User.query.get_or_404(user_id)
+    session = Session.query.get_or_404(session_id)
+    return render_template("checkin_detail.html", user=user, session=session)
+
+
+# Submit check-in (UI flow)
+@sessions_bp.route("/checkin/submit", methods=["POST"])
+def submit_checkin():
+    user_id = int(request.form.get("user_id"))
+    session_id = int(request.form.get("session_id"))
+    service_number = int(request.form.get("service_number"))
+
+    # Prevent duplicates.
+    existing = AttendanceRecord.query.filter_by(
+        user_id=user_id,
+        session_id=session_id,
+        service_number=service_number
+    ).first()
+
+    if existing:
+        return redirect(url_for("sessions.checkin_view", id=session_id))
+
+    record = AttendanceRecord(
+        user_id=user_id,
+        session_id=session_id,
+        date=date.today(),
+        status="present",
+        service_number=service_number
+    )
+
+    db.session.add(record)
+    db.session.commit()
+
+    return redirect(url_for("sessions.checkin_view", id=session_id))
