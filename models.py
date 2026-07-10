@@ -14,6 +14,11 @@ class User(db.Model):
     date_of_birth = db.Column(db.Date)
     date_joined = db.Column(db.Date, nullable=False)
 
+    # NEW - required for class group filtering.
+    classgroup_id = db.Column(db.Integer, db.ForeignKey('classgroups.id'), nullable=True)
+    classgroup = db.relationship("ClassGroup", backref="users")
+
+
     def to_dict(self):
         return {
             "id": self.id,

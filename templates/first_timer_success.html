@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Welcome!{% endblock %}
+
+{% block content %}
+<div class="alert alert-success mt-4">
+    Welcome {{ user.full_name }}! Your attendance has been recorded.
+</div>
+
+<p>You have been assigned to the <strong>{{ assigned_group.name }}</strong> class group.</p>
+<p>Next time, please check in at the <strong>{{ assigned_group.name }}</strong> pad.</p>
+
+<a href="{{ url_for('sessions.checkin_view', id=pad_session_id) }}" class="btn btn-primary mt-3">
+    Back to Check-In
+</a>
+{% endblock %}

@@ -19,9 +19,12 @@
 <ul class="list-group">
     {% for user in users %}
         <li class="list-group-item">
-            <a href="{{ url_for('sessions.checkin_detail', user_id=user.id, session_id=session_id) }}">
-                {{ user.full_name }}
-            </a>
+            <div class="card p-2">
+                <a class="fw-bold"
+                   href="{{ url_for('sessions.checkin_detail', user_id=user.id, session_id=session_id) }}">
+                    {{ user.full_name }}
+                </a>
+            </div>
         </li>
     {% endfor %}
 </ul>
@@ -38,18 +41,28 @@
 <script>
 document.getElementById("user-search").addEventListener("keyup", async (e) => {
     const q = e.target.value;
-    if (!q) return;
-
-    const res = await fetch(`/users/search?q=${q}`);
-    const users = await res.json();
-
     const list = document.getElementById("results");
     list.innerHTML = "";
+
+    if (!q) return;
+
+    // Get the class group ID from the current session.
+    const groupId = Number("{{ session.classgroup_id }}");
+
+    // Fetch only users belonging to this class group.
+    const res = await fetch(`/users/search_by_group?q=${encodeURIComponent(q)}&group_id=${groupId}`);
+    const users = await res.json();
 
     users.forEach(u => {
         const li = document.createElement("li");
         li.className = "list-group-item";
-        li.innerHTML = `<a href="/checkin/${u.id}/${document.getElementById('session-id').value}">${u.full_name}</a>`;
+        li.innerHTML = `
+            <div class="card p-2">
+                <a class="fw-bold" href="/checkin/${u.id}/${document.getElementById('session-id').value}">
+                    ${u.full_name}
+                </a>
+            </div>
+        `;
         list.appendChild(li);
     });
 });

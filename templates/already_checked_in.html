@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Already Checked In{% endblock %}
+
+{% block content %}
+<div class="alert alert-info mt-4">
+    {{ user.full_name }} has already checked in for this session.
+</div>
+
+<p>Service: {{ record.service_number }}</p>
+<p>Status: {{ record.status }}</p>
+
+<a href="{{ url_for('sessions.checkin_view', id=session.id) }}" class="btn btn-secondary mt-3">
+    Back to Check-In
+</a>
+{% endblock %}

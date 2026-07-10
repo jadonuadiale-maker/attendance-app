@@ -80,38 +80,93 @@ def get_session(id):
     session = Session.query.get_or_404(id)        # attemps to retrieve the session, if not found, automatically return a 404 error.
     return jsonify(session.to_dict())             # returns the session as JSON.
 
-# For check-in. 
-@sessions_bp.route("/sessions/<int:session_id>/checkin", methods=["POST"])
-def checkin (session_id):
-    data = request.json
-    user_id = data.get("user_id")
-    service_number = data.get("service_number") # 1, 2, or 3 ("both")
+# Check-in page (per session, per pad)
+@sessions_bp.route("/sessions/<int:id>/checkin/view", methods=["GET"])
+def checkin_view(id):
+    session = Session.query.get_or_404(id)
 
-    # Validate session.
-    session = Session.query.get(session_id)
-    if not session:
-        return jsonify({"error": "Session not found"}), 404
-    
-    # Validate user.
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-    
-    # Validate service_number.
-    if service_number not in [1, 2, 3]:
-        return jsonify({"error": "Invalid service number"}), 400
-    
-    # Prevent duplicate check-in per service. 
+    # --- Ensure session is for today (avoids stale pads) ---
+    today = date.today().isoformat()
+    if session.date != today:
+        return render_template(
+            "error.html",
+            message="This session is not for today. Please refresh or use the correct pad."
+        )
+
+    # --- Filter users by class group of this session(pad-specific view) ---
+    users = User.query.filter_by(classgroup_id=session.classgroup_id) \
+                      .order_by(User.full_name.asc()).all()
+    return render_template("checkin.html", session_id=id, session=session, users=users)
+
+
+# Check-in detail page (2-step flow)
+@sessions_bp.route("/checkin/<int:user_id>/<int:session_id>")
+def checkin_detail(user_id, session_id):
+    user = User.query.get_or_404(user_id)
+    session = Session.query.get_or_404(session_id)
+
+    # --- Block cross-group check-ins ---
+    if user.classgroup_id != session.classgroup_id:
+        return render_template(
+            "error.html",
+            message="This user does not belong to this class group."
+        )
+
+    # --- Ensure session is for today ---
+    today = date.today().isoformat()
+    if session.date != today:
+        return render_template(
+            "error.html",
+            message="This session is not for today. Please refresh or use the correct pad."
+        )
+
+    # --- If already checked in, show info instead of form ---
     existing = AttendanceRecord.query.filter_by(
-        user_id=user_id,
-        session_id=session_id,
-        service_number=service_number
+        user_id=user.id,
+        session_id=session.id
     ).first()
 
     if existing:
-        return jsonify({"error": "User already checked in"}), 400
-    
-    # Create attendance record. 
+        return render_template(
+            "already_checked_in.html",
+            user=user,
+            session=session,
+            record=existing
+        )
+
+    return render_template("checkin_detail.html", user=user, session=session)
+
+
+# API check-in (used by UI submit)
+@sessions_bp.route("/sessions/<int:session_id>/checkin", methods=["POST"])
+def checkin(session_id):
+    data = request.json
+    user_id = data.get("user_id")
+    service_number = data.get("service_number")  # 1, 2, or 3 ("both")
+
+    session = Session.query.get(session_id)
+    if not session:
+        return jsonify({"error": "Session not found"}), 404
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if service_number not in [1, 2, 3]:
+        return jsonify({"error": "Invalid service number"}), 400
+
+    # --- One record per user per session: update instead of duplicate ---
+    existing = AttendanceRecord.query.filter_by(
+        user_id=user_id,
+        session_id=session_id
+    ).first()
+
+    if existing:
+        existing.service_number = service_number
+        existing.status = "present"
+        db.session.commit()
+        return jsonify({"message": "Check-in updated"}), 200
+
     record = AttendanceRecord(
         user_id=user_id,
         session_id=session_id,
@@ -125,36 +180,23 @@ def checkin (session_id):
 
     return jsonify({"message": "Check-in successful"}), 201
 
-# Check-in page. 
-@sessions_bp.route("/sessions/<int:id>/checkin/view", methods=["GET"])
-def checkin_view(id):
-    session = Session.query.get_or_404(id)
-    users = User.query.order_by(User.full_name.asc()).all()
-    return render_template("checkin.html", session_id=id, session=session, users=users)
 
-# Check-in detail page (UI flow).
-@sessions_bp.route("/checkin/<int:user_id>/<int:session_id>")
-def checkin_detail(user_id, session_id):
-    user = User.query.get_or_404(user_id)
-    session = Session.query.get_or_404(session_id)
-    return render_template("checkin_detail.html", user=user, session=session)
-
-
-# Submit check-in (UI flow)
+# UI submit check-in (form-based)
 @sessions_bp.route("/checkin/submit", methods=["POST"])
 def submit_checkin():
     user_id = int(request.form.get("user_id"))
     session_id = int(request.form.get("session_id"))
     service_number = int(request.form.get("service_number"))
 
-    # Prevent duplicates.
     existing = AttendanceRecord.query.filter_by(
         user_id=user_id,
-        session_id=session_id,
-        service_number=service_number
+        session_id=session_id
     ).first()
 
     if existing:
+        existing.service_number = service_number
+        existing.status = "present"
+        db.session.commit()
         return redirect(url_for("sessions.checkin_view", id=session_id))
 
     record = AttendanceRecord(
@@ -169,3 +211,21 @@ def submit_checkin():
     db.session.commit()
 
     return redirect(url_for("sessions.checkin_view", id=session_id))
+
+
+# Admin override route
+@sessions_bp.route("/attendance/<int:record_id>/override", methods=["POST"])
+def override_attendance(record_id):
+    record = AttendanceRecord.query.get_or_404(record_id)
+
+    new_status = request.form.get("status")
+    new_service = request.form.get("service_number")
+
+    # --- Admin can fix status/service safely ---
+    if new_status:
+        record.status = new_status
+    if new_service:
+        record.service_number = int(new_service)
+
+    db.session.commit()
+    return redirect(url_for("attendance"))
