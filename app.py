@@ -1,11 +1,21 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_migrate import Migrate
-from datetime import date
+from datetime import date, datetime
 from extensions import db
 from models import *
 from routes.classgroups import classgroups_bp
 from routes.sessions import sessions_bp
 from routes.users import users_bp
+def assign_classgroup_from_dob(dob):
+    today = date.today()
+    age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+    if 2 <= age <= 6:
+        return ClassGroup.query.filter_by(name="2-6").first()
+    elif 7 <= age <= 12:
+        return ClassGroup.query.filter_by(name="7-12").first()
+    else:
+        return ClassGroup.query.filter_by(name="Teens").first()
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
@@ -36,11 +46,26 @@ def users():
 # ADD USER - Form Submission.
 @app.route('/add_user', methods=['POST'])
 def add_user():
-    name = request.form['username']
-    user = User(name=name)
+    first = request.form['first_name']
+    surname = request.form['surname']
+    dob_raw = request.form.get('date_of_birth')
+    dob = datetime.strptime(dob_raw, "%Y-%m-%d").date() if dob_raw else None
+
+    group = assign_classgroup_from_dob(dob)
+
+    user = User(
+        first_name=first,
+        surname=surname,
+        full_name=f"{first} {surname}",
+        date_of_birth=dob,
+        date_joined=date.today(),
+        classgroup_id=group.id if group else None
+    )
+
     db.session.add(user)
     db.session.commit()
     return redirect(url_for('users'))
+
 
 # DELETE USER - Utility Route.
 @app.route('/delete_user/<int:id>', methods=['POST'])

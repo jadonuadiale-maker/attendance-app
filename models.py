@@ -35,7 +35,7 @@ class User(db.Model):
 class ClassGroup(db.Model):
     __tablename__ = "classgroups"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
 
     # Relationship: one class group -> many sessions. 
     sessions = db.relationship("Session", backref="classgroup", lazy=True)
@@ -57,6 +57,10 @@ class Session(db.Model):
     date = db.Column(db.String(50), nullable=False)
     topic = db.Column(db.String(200))
     description = db.Column(db.String(255))  # Optional field for future expansion. 
+
+    __table_args__ = (
+        db.UniqueConstraint('classgroup_id', 'date', name='unique_group_date'),
+    )
 
     def to_dict(self):
         return {

@@ -1,10 +1,42 @@
 from flask import Blueprint, jsonify, request, render_template, url_for, redirect # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: for html page view. 
 from extensions import db                      # db: SQLAlchemy database instance. 
-from models import AttendanceRecord, User, Session                     # model representing an individual teaching session belonging to a class group.
+from models import AttendanceRecord, User, Session, ClassGroup                     # model representing an individual teaching session belonging to a class group.
 from datetime import date
 
 # These imports connect Flask's routing tooks, the database layer, and the Session model.
 # Together, they allow this file to act as the dedicated API surface for session operations. 
+
+# --- AUTO-CREATE SESSIONS FOR TODAY ---
+def auto_create_sessions():
+    today = date.today().isoformat()
+    created_sessions = []
+
+    # Fetch all class groups (2-6, 7-12, Teens)
+    groups = ClassGroup.query.all()
+
+    for group in groups:
+        # Prevent duplicates
+        existing = Session.query.filter_by(
+            classgroup_id=group.id,
+            date=today
+        ).first()
+
+        if existing:
+            continue
+
+        # Create session for this group
+        session = Session(
+            classgroup_id=group.id,
+            date=today,
+            topic="Sunday Service"
+        )
+
+        db.session.add(session)
+        created_sessions.append(session)
+
+    db.session.commit()
+    return created_sessions
+
 
 sessions_bp = Blueprint('sessions', __name__)   # Creates a blueprint named "sessions"
 
@@ -58,12 +90,10 @@ def create_session_api(group_id):
     return jsonify(session.to_dict()), 201                           # returns the newly created session with HTTP status 201 created. 
 
 # For Auto-Creation.
-@sessions_bp.route("/sessions/auto_create", methods=["POST"])
+@sessions_bp.route("/sessions/auto_create", methods=["GET", "POST"])
 def auto_create():
     created = auto_create_sessions()   # Only daily logic is needed. 
-    return jsonify({
-        "created_sessions": [s.to_dict() for s in created]
-        }), 201
+    return redirect(url_for('sessions.sessions'))
 
 # GET a single session. 
 
@@ -157,15 +187,14 @@ def checkin(session_id):
 
     # --- One record per user per session: update instead of duplicate ---
     existing = AttendanceRecord.query.filter_by(
-        user_id=user_id,
-        session_id=session_id
-    ).first()
+    user_id=user_id,
+    session_id=session_id
+).first()
 
+    # --- Reject duplicate check-ins (tests expect 400) ---
     if existing:
-        existing.service_number = service_number
-        existing.status = "present"
-        db.session.commit()
-        return jsonify({"message": "Check-in updated"}), 200
+        return jsonify({"error": "User already checked in"}), 400
+
 
     record = AttendanceRecord(
         user_id=user_id,
@@ -228,4 +257,11 @@ def override_attendance(record_id):
         record.service_number = int(new_service)
 
     db.session.commit()
-    return redirect(url_for("attendance"))
+    return redirect(url_for("sessions.attendance_view", id=record.session_id))
+
+# Attendance Marking UI.
+@sessions_bp.route("/sessions/<int:id>/attendance/view")
+def attendance_view(id):
+    session = Session.query.get_or_404(id)
+    records = AttendanceRecord.query.filter_by(session_id=id).all()
+    return render_template("attendance_marking.html", session=session, records=records)

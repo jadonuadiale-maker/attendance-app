@@ -38,22 +38,32 @@ def submit_first_timer():
 
     dob = datetime.strptime(dob_raw, "%Y-%m-%d").date() if dob_raw else None
 
-    # --- Check if user already exists ---
-    existing_user = User.query.filter_by(full_name=f"{first_name} {surname}").first()
+    # --- Check if user already exists (case-insensitive name match only) ---
+    existing_user = User.query.filter(
+        db.func.lower(User.full_name) == f"{first_name.lower()} {surname.lower()}"
+    ).first()
+
+    # --- Guard against duplicate profiles ---
     if existing_user:
-        user = existing_user
-    else:
-        user = User(
-            first_name=first_name,
-            surname=surname,
-            full_name=f"{first_name} {surname}",
-            date_of_birth=dob,
-            date_joined=date.today()
+        return render_template(
+            "error.html",
+            message="A user with this name already exists. Please use the regular check-in instead."
         )
 
-        # --- Add and commit user ---
-        db.session.add(user)
-        db.session.commit()
+
+
+    # --- Create new user if not found ---
+    user = User(
+        first_name=first_name,
+        surname=surname,
+        full_name=f"{first_name} {surname}",
+        date_of_birth=dob,
+        date_joined=date.today()
+    )
+
+    # --- Add and commit user ---
+    db.session.add(user)
+    db.session.commit()
 
     # --- Assign correct class group based on DOB ---
     assigned_group = assign_classgroup_from_dob(dob)
@@ -67,6 +77,14 @@ def submit_first_timer():
         classgroup_id=assigned_group.id,
         date=today
     ).first()
+
+    # --- Prevent crash if auto-create hasn't run ---
+    if not correct_session:
+        return render_template(
+            "error.html",
+            message="No session exists for this class group today. Please ask an admin to auto-create today's sessions."
+        )
+
 
     # --- Store attendance in correct class group session ---
     record = AttendanceRecord(
@@ -116,16 +134,17 @@ def admin_submit_user():
     dob_raw = request.form.get("date_of_birth")
 
     dob = datetime.strptime(dob_raw, "%Y-%m-%d").date() if dob_raw else None
+    assigned_group = assign_classgroup_from_dob(dob)
 
     user = User(
         first_name=first_name,
         surname=surname,
         full_name=f"{first_name} {surname}",
         date_of_birth=dob,
-        date_joined=date.today()
+        date_joined=date.today(),
+        classgroup_id=assigned_group.id if assigned_group else None
     )
 
     db.session.add(user)
     db.session.commit()
-
     return redirect(url_for("users"))

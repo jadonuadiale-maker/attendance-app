@@ -1,8 +1,8 @@
 """Initial schema
 
-Revision ID: 85a147659fa5
+Revision ID: 3a517f7aea1b
 Revises: 
-Create Date: 2026-07-10 22:17:46.013828
+Create Date: 2026-07-11 14:29:24.573731
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '85a147659fa5'
+revision = '3a517f7aea1b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,7 +21,8 @@ def upgrade():
     op.create_table('classgroups',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('sessions',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -30,7 +31,8 @@ def upgrade():
     sa.Column('topic', sa.String(length=200), nullable=True),
     sa.Column('description', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['classgroup_id'], ['classgroups.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('classgroup_id', 'date', name='unique_group_date')
     )
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),

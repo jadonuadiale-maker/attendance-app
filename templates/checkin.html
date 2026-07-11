@@ -39,32 +39,34 @@
 
 {% block scripts %}
 <script>
-document.getElementById("user-search").addEventListener("keyup", async (e) => {
-    const q = e.target.value;
-    const list = document.getElementById("results");
-    list.innerHTML = "";
+let debounceTimer;
 
-    if (!q) return;
+document.getElementById("user-search").addEventListener("keyup", (e) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+        const q = e.target.value;
+        const list = document.getElementById("results");
+        list.innerHTML = "";
 
-    // Get the class group ID from the current session.
-    const groupId = Number("{{ session.classgroup_id }}");
+        if (!q) return;
 
-    // Fetch only users belonging to this class group.
-    const res = await fetch(`/users/search_by_group?q=${encodeURIComponent(q)}&group_id=${groupId}`);
-    const users = await res.json();
+        const groupId = Number("{{ session.classgroup_id }}");
+        const res = await fetch(`/users/search_by_group?q=${encodeURIComponent(q)}&group_id=${groupId}`);
+        const users = await res.json();
 
-    users.forEach(u => {
-        const li = document.createElement("li");
-        li.className = "list-group-item";
-        li.innerHTML = `
-            <div class="card p-2">
-                <a class="fw-bold" href="/checkin/${u.id}/${document.getElementById('session-id').value}">
-                    ${u.full_name}
-                </a>
-            </div>
-        `;
-        list.appendChild(li);
-    });
+        users.forEach(u => {
+            const li = document.createElement("li");
+            li.className = "list-group-item";
+            li.innerHTML = `
+                <div class="card p-2">
+                    <a class="fw-bold" href="/checkin/${u.id}/${document.getElementById('session-id').value}">
+                        ${u.full_name}
+                    </a>
+                </div>
+            `;
+            list.appendChild(li);
+        });
+    }, 300); // 300ms delay
 });
 </script>
 {% endblock %}
