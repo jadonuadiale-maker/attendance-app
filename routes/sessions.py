@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, render_template, url_for, redirec
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import AttendanceRecord, User, Session, ClassGroup                     # model representing an individual teaching session belonging to a class group.
 from datetime import date
+from utils.auth_utils import login_required, role_required
 
 # These imports connect Flask's routing tooks, the database layer, and the Session model.
 # Together, they allow this file to act as the dedicated API surface for session operations. 
@@ -10,7 +11,6 @@ from datetime import date
 def auto_create_sessions():
     today = date.today().isoformat()
     created_sessions = []
-
     # Fetch all class groups (2-6, 7-12, Teens)
     groups = ClassGroup.query.all()
 
@@ -62,8 +62,10 @@ def get_sessions(group_id):
 
 # POST CREATE A SESSION FOR A CLASS GROUP. 
 
-# For HTML view.
+# For HTML view (admin only).
 @sessions_bp.route('/sessions/create', methods=['POST'])
+@login_required
+@role_required("admin")
 def create_session_html():
     data = request.form
     group_id = data.get('group_id')
@@ -76,8 +78,10 @@ def create_session_html():
     db.session.commit()
     return redirect(url_for('sessions.sessions'))
 
-# For API testing.
+# For API testing (admin only).
 @sessions_bp.route("/classgroups/<int:group_id>/sessions", methods=["POST"]) # endpoint for creating a new session under a specif class group .
+@login_required
+@role_required("admin")
 def create_session_api(group_id):
     data = request.json                                              # reads the JSON payload sent by the client. 
     session = Session(
@@ -89,8 +93,10 @@ def create_session_api(group_id):
     db.session.commit()                                              # saves it permanently.
     return jsonify(session.to_dict()), 201                           # returns the newly created session with HTTP status 201 created. 
 
-# For Auto-Creation.
+# For Auto-Creation (admin only).
 @sessions_bp.route("/sessions/auto_create", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
 def auto_create():
     created = auto_create_sessions()   # Only daily logic is needed. 
     return redirect(url_for('sessions.sessions'))
@@ -242,8 +248,10 @@ def submit_checkin():
     return redirect(url_for("sessions.checkin_view", id=session_id))
 
 
-# Admin override route
+# Admin override route (admin only).
 @sessions_bp.route("/attendance/<int:record_id>/override", methods=["POST"])
+@login_required
+@role_required("admin")
 def override_attendance(record_id):
     record = AttendanceRecord.query.get_or_404(record_id)
 

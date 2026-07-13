@@ -1,8 +1,8 @@
-"""Initial schema
+"""Initial Schema
 
-Revision ID: 3a517f7aea1b
+Revision ID: 8ca4dc8ad62c
 Revises: 
-Create Date: 2026-07-11 14:29:24.573731
+Create Date: 2026-07-13 11:20:40.951075
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '3a517f7aea1b'
+revision = '8ca4dc8ad62c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -42,6 +42,8 @@ def upgrade():
     sa.Column('date_of_birth', sa.Date(), nullable=True),
     sa.Column('date_joined', sa.Date(), nullable=False),
     sa.Column('classgroup_id', sa.Integer(), nullable=True),
+    sa.Column('password_hash', sa.String(length=256), nullable=True),
+    sa.Column('role', sa.String(length=20), nullable=True),
     sa.ForeignKeyConstraint(['classgroup_id'], ['classgroups.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

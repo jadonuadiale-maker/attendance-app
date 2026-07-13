@@ -1,4 +1,5 @@
 from extensions import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # USER MODEL.
 # Represents an individual user in the system.
@@ -17,6 +18,16 @@ class User(db.Model):
     # NEW - required for class group filtering.
     classgroup_id = db.Column(db.Integer, db.ForeignKey('classgroups.id'), nullable=True)
     classgroup = db.relationship("ClassGroup", backref="users")
+
+    # NEW FIELDS — only relevant for teachers/admins
+    password_hash = db.Column(db.String(256), nullable=True)  # members can leave this empty
+    role = db.Column(db.String(20), default="member")         # defaults to member, staff override
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
     def to_dict(self):

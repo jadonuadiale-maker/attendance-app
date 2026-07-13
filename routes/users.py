@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, jsonif
 from datetime import date, datetime
 from extensions import db
 from models import User, AttendanceRecord, Session, ClassGroup
+from utils.auth_utils import login_required, role_required
 
 users_bp = Blueprint("users", __name__)
 
@@ -126,8 +127,10 @@ def search_by_group():
 def admin_create_user():
     return render_template("admin_add_user.html")
 
-
+# (admin only).
 @users_bp.route("/admin/users/submit", methods=["POST"])
+@login_required
+@role_required("admin")
 def admin_submit_user():
     first_name = request.form.get("first_name")
     surname = request.form.get("surname")

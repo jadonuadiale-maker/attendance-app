@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_migrate import Migrate
 from datetime import date, datetime
@@ -6,6 +7,9 @@ from models import *
 from routes.classgroups import classgroups_bp
 from routes.sessions import sessions_bp
 from routes.users import users_bp
+from routes.auth import auth_bp
+from utils.auth_utils import login_required, role_required
+
 def assign_classgroup_from_dob(dob):
     today = date.today()
     age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
@@ -18,6 +22,7 @@ def assign_classgroup_from_dob(dob):
 
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET-KEY", os.urandom(24))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
 
 db.init_app(app)
@@ -29,10 +34,16 @@ migrate = Migrate(app, db)
 app.register_blueprint(classgroups_bp)
 app.register_blueprint(sessions_bp)
 app.register_blueprint(users_bp)
+app.register_blueprint(auth_bp)
 
-# DASHBOARD ROUTE (Main Landing Page).
+# FIRST PAGE -> LOGIN.
 @app.route('/')
+def index():
+    return redirect(url_for('auth.login_page'))
+
+# DASHBOARD PAGE
 @app.route('/dashboard')
+@login_required
 def dashboard():
     # Dashboard will eventually show stats, quick links, etc. 
     return render_template('dashboard.html')
@@ -67,8 +78,10 @@ def add_user():
     return redirect(url_for('users'))
 
 
-# DELETE USER - Utility Route.
+# DELETE USER - Utility Route (admin only).
 @app.route('/delete_user/<int:id>', methods=['POST'])
+@login_required
+@role_required("admin")
 def delete_user(id):
     user = User.query.get_or_404(id)
     db.session.delete(user)

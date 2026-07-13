@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for  # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: to view html page. 
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import ClassGroup                  # model representing a class group(e.g. 2-6, Teens).
+from utils.auth_utils import login_required, role_required
 
 # These imports connect Flask's routing tools, my database layer, and the 
 # ClassGroup model, so this file can act as the dedicated API surfaace for class group operations. 
@@ -29,8 +30,10 @@ def index():
 
 # POST create class group.
 
-# For HTML view.
+# For HTML view. (admin only)
 @classgroups_bp.route("/classgroups/create", methods=["POST"])
+@login_required
+@role_required("admin")
 def create_classgroup_html():
     data = request.form
     group = ClassGroup(name=data["name"])
@@ -38,8 +41,10 @@ def create_classgroup_html():
     db.session.commit()
     return redirect(url_for('classgroups.classes'))
 
-# For API testing. 
+# For API testing (admin only)
 @classgroups_bp.route("/classgroups", methods=["POST"]) # route. 
+@login_required
+@role_required("admin")
 def create_classgroup_api():
     data = request.json                                 # reads the JSON body sent by the client. 
     group = ClassGroup(name=data["name"])               # creates a new class group using the provided name. 
@@ -55,6 +60,8 @@ def get_classgroup(id):
 
 # DELETE class group.
 @classgroups_bp.route("/classgroups/<int:id>", methods=["DELETE"]) # route.
+@login_required
+@role_required("admin")
 def delete_classgroup(id):
     group = ClassGroup.query.get_or_404(id)                        # ensures we only attempt to delte an existing group.
     db.session.delete(group)                                       # marks the object for deletion.
