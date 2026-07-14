@@ -5,7 +5,8 @@
 {% block content %}
 <h1 class="mb-4">Sessions</h1>
 
-<!-- Add Session form -->
+<!-- Add Session form (only for admin)-->
+{% if session.role == "admin" %}
 <form action="{{ url_for('sessions.create_session_html') }}" method="POST" class="mb-4">
   <div class="row g-2">
     <div class="col-md-4">
@@ -26,6 +27,14 @@
     </div>
   </div>
 </form>
+{% endif %}
+
+<!-- Auto Creation for session -->
+ {% if session.role == "admin" %}
+<a href="{{ url_for('sessions.auto_create') }}" class="btn btn-warning mb-3">
+    Auto-Create Today's Sessions
+</a>
+{% endif %}
 
 
 <!-- Sessions table -->

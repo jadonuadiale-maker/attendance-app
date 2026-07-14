@@ -44,12 +44,15 @@ def index():
 # DASHBOARD PAGE
 @app.route('/dashboard')
 @login_required
+@role_required("admin", "teacher")
 def dashboard():
     # Dashboard will eventually show stats, quick links, etc. 
     return render_template('dashboard.html')
 
 # USER PAGE - List All Users.
 @app.route('/users')
+@login_required
+@role_required("admin", "teacher")
 def users():
     all_users = User.query.all()
     return render_template('users.html', users=all_users)
@@ -90,9 +93,12 @@ def delete_user(id):
 
 # ATTENDANCE RECORDS PAGE.
 @app.route('/attendance')
+@login_required
+@role_required("admin", "teacher")
 def attendance():
     records = AttendanceRecord.query.all()
-    return render_template('attendance.html', records=records)
+    sessions = Session.query.all()
+    return render_template('attendance.html', records=records, sessions=sessions)
 
 # AUTOCOMPLETE USERS SEARCH.
 @app.route("/users/search")

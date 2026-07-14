@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, render_template, url_for, redirect # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: for html page view. 
+from flask import Blueprint, jsonify, request, render_template, url_for, redirect, session as flask_session # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: for html page view. 
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import AttendanceRecord, User, Session, ClassGroup                     # model representing an individual teaching session belonging to a class group.
 from datetime import date
@@ -48,6 +48,8 @@ def sessions_overview():
 
 # Session overview route for HTML page. 
 @sessions_bp.route('/sessions/view', methods=['GET'])
+@login_required
+@role_required("admin", "teacher")
 def sessions():
     from models import ClassGroup
     groups = ClassGroup.query.all()
@@ -105,8 +107,17 @@ def auto_create():
 
 # For HTML view. 
 @sessions_bp.route("/sessions/<int:id>/view", methods=["GET"])
+@login_required
+@role_required("admin", "teacher")
 def view_session(id):
     session = Session.query.get_or_404(id)
+
+    # --- Teacher scoping ---
+    if flask_session.get("role") == "teacher":
+        teacher = User.query.get(session["user_id"])
+        if teacher.classgroup_id != session.classgroup_id:
+            return "Unauthorized", 403
+
     return render_template("session_detail.html", session=session)
 
 
@@ -269,7 +280,16 @@ def override_attendance(record_id):
 
 # Attendance Marking UI.
 @sessions_bp.route("/sessions/<int:id>/attendance/view")
+@login_required
+@role_required("admin", "teacher")
 def attendance_view(id):
     session = Session.query.get_or_404(id)
+
+    # --- Teacher scoping ---
+    if flask_session.get("role") == "teacher":
+        teacher = User.query.get(session["user_id"])
+        if teacher.classgroup_id != session.classgroup_id:
+            return "Unauthorized", 403
+
     records = AttendanceRecord.query.filter_by(session_id=id).all()
     return render_template("attendance_marking.html", session=session, records=records)

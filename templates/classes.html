@@ -6,12 +6,14 @@
 <h1 class="mb-4">Class Groups</h1>
 
 <!-- Add Class Group form -->
+{% if session.role == "admin" %}
 <form action="{{ url_for('classgroups.create_classgroup_html') }}" method="POST" class="mb-4">
   <div class="input-group">
     <input type="text" name="name" class="form-control" placeholder="Enter class group name" required>
     <button class="btn btn-success" type="submit">Add Class Group</button>
   </div>
 </form>
+{% endif %}
 
 <!-- Class Groups table -->
 <table class="table table-striped table-bordered">

@@ -124,6 +124,8 @@ def search_by_group():
 
 # Admin add user (no attendance)
 @users_bp.route("/admin/users/create")
+@login_required
+@role_required("admin")
 def admin_create_user():
     return render_template("admin_add_user.html")
 

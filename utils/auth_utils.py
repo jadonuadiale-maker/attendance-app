@@ -12,11 +12,12 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
-def role_required(role):
+# Multi-role support (teachers, admins, members).
+def role_required(*role):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            if session.get("role") != role:
+            if session.get("role") not in role:
                 return "Unauthorized", 403
             return f(*args, **kwargs)
         return wrapper
