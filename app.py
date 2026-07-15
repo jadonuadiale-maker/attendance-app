@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_migrate import Migrate
 from datetime import date, datetime
 from extensions import db
@@ -41,13 +41,48 @@ app.register_blueprint(auth_bp)
 def index():
     return redirect(url_for('auth.login_page'))
 
-# DASHBOARD PAGE
+# DASHBOARD PAGE (updated)
 @app.route('/dashboard')
 @login_required
 @role_required("admin", "teacher")
 def dashboard():
-    # Dashboard will eventually show stats, quick links, etc. 
-    return render_template('dashboard.html')
+    today = date.today().isoformat()
+
+    # --- Role-aware session filtering ---
+    role = session.get("role")
+    user_id = session.get("user_id")
+
+    if role == "teacher":
+        teacher = User.query.get(user_id)
+        sessions = Session.query.filter_by(
+            classgroup_id=teacher.classgroup_id,
+            date=today
+        ).all()
+    else:
+        sessions = Session.query.filter_by(date=today).all()
+
+    # --- Build per-session attendance summary ---
+    summary = {}
+
+    for s in sessions:
+        records = AttendanceRecord.query.filter_by(session_id=s.id).all()
+
+        service1 = sum(1 for r in records if r.service_number == 1)
+        service2 = sum(1 for r in records if r.service_number == 2)
+        both = sum(1 for r in records if r.service_number == 3)
+        total = len(records)
+
+        summary[s.id] = {
+            "group_name": s.classgroup.name,
+            "service1": service1,
+            "service2": service2,
+            "both": both,
+            "total": total,
+            "session": s
+        }
+
+    return render_template("dashboard.html", summary=summary)
+
 
 # USER PAGE - List All Users.
 @app.route('/users')

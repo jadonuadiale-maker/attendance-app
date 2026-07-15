@@ -114,7 +114,7 @@ def view_session(id):
 
     # --- Teacher scoping ---
     if flask_session.get("role") == "teacher":
-        teacher = User.query.get(session["user_id"])
+        teacher = User.query.get(flask_session.get("user_id"))
         if teacher.classgroup_id != session.classgroup_id:
             return "Unauthorized", 403
 
@@ -287,7 +287,7 @@ def attendance_view(id):
 
     # --- Teacher scoping ---
     if flask_session.get("role") == "teacher":
-        teacher = User.query.get(session["user_id"])
+        teacher = User.query.get(flask_session.get("user_id"))
         if teacher.classgroup_id != session.classgroup_id:
             return "Unauthorized", 403
 

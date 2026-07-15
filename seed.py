@@ -24,6 +24,11 @@ with app.app_context():
         role="teacher"
     )
     teacher.set_password("teacher123")
+
+    # --- Assign teacher to a class group (IMPORTANT) ---
+    # Ensure classgroup with id=1 exists (e.g., "2-6")
+    teacher.classgroup_id = 1
+
     db.session.add(teacher)
 
     db.session.commit()

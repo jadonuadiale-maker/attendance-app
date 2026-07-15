@@ -1,46 +1,40 @@
 {% extends "base.html" %}
-
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<!-- Page heading -->
-<h1 class="mb-4">Dashboard</h1>
+<h1 class="mb-4">Attendance Summary — Today</h1>
 
-<!-- Dashboard cards row -->
- <div class="row">
-
-    <!-- Users card -->
-     <div class="col-md-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Users</h5>
-                <p class="card-text">Manage all registered users.</p>
-                <a href="{{ url_for('users') }}" class="btn btn-primary">View Users</a>
-            </div>
+{% if summary %}
+    {% for id, data in summary.items() %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <strong>{{ data.group_name }}</strong> — Session {{ id }}
         </div>
-     </div>
 
-     <!-- Classes card -->
-      <div class="col-md-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Classes</h5>
-                <p class="card-text">View and manage class groups.</p>
-                <a href="{{ url_for('classgroups.classes') }}" class="btn btn-primary">View Classes</a>
-            </div>
+        <div class="card-body">
+            <p>Service 1: {{ data.service1 }}</p>
+            <p>Service 2: {{ data.service2 }}</p>
+            <p>Both Services: {{ data.both }}</p>
+            <p><strong>Total: {{ data.total }}</strong></p>
+
+            {% if data.total >= 20 %}
+                <span class="badge bg-success">High Attendance</span>
+            {% elif data.total >= 10 %}
+                <span class="badge bg-warning">Moderate Attendance</span>
+            {% else %}
+                <span class="badge bg-danger">Low Attendance</span>
+            {% endif %}
+
+            <hr>
+
+            <a href="{{ url_for('sessions.attendance_view', id=data.session.id) }}"
+               class="btn btn-primary btn-sm">
+                View Attendance
+            </a>
         </div>
-      </div>
-
-      <!-- Attendance card -->
-       <div class="col-md-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Attendance</h5>
-                <p class="card-text">Track attendance records.</p>
-                <a href="{{ url_for('attendance') }}" class="btn btn-primary">View Attendance</a>
-            </div>
-        </div>
-       </div>
-
- </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info">No sessions found for today.</div>
+{% endif %}
 {% endblock %}
