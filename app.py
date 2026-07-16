@@ -8,6 +8,7 @@ from routes.classgroups import classgroups_bp
 from routes.sessions import sessions_bp
 from routes.users import users_bp
 from routes.auth import auth_bp
+from routes.reports import reports_bp
 from utils.auth_utils import login_required, role_required
 
 def assign_classgroup_from_dob(dob):
@@ -35,6 +36,7 @@ app.register_blueprint(classgroups_bp)
 app.register_blueprint(sessions_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(reports_bp)
 
 # FIRST PAGE -> LOGIN.
 @app.route('/')
