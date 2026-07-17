@@ -85,12 +85,27 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h6 class="card-title text-muted">{{ key|replace("_", " ")|title }}</h6>
-                <p class="card-text fs-4">{{ value }}</p>
+                 <p class="card-text fs-4
+                    {% if key == 'late' %}text-warning{% endif %}
+                    {% if key == 'absent' %}text-danger{% endif %}
+                    {% if key == 'service1_load' %}text-primary{% endif %}
+                    {% if key == 'service2_load' %}text-success{% endif %}
+                    {% if key == 'first_timers' %}text-purple{% endif %}
+                ">
+                    {{ value }}
+                </p>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+<!-- Empty state -->
+{% if report.records|length == 0 %}
+<div class="alert alert-info mt-3">
+    No records found for the selected filters.
+</div>
+{% endif %}
 
 <!-- Raw records table -->
 <h3 class="mt-4 mb-3">Records</h3>

@@ -91,7 +91,7 @@ def submit_first_timer():
     record = AttendanceRecord(
         user_id=user.id,
         session_id=correct_session.id,
-        date=date.today(),
+        date=correct_session.date,  # ensures consistency with session date.
         status="present",
         service_number=service_number
     )

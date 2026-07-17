@@ -216,7 +216,7 @@ def checkin(session_id):
     record = AttendanceRecord(
         user_id=user_id,
         session_id=session_id,
-        date=date.today(),
+        date=session.date, # ensures consistency with session date. 
         status="present",
         service_number=service_number
     )
@@ -245,10 +245,12 @@ def submit_checkin():
         db.session.commit()
         return redirect(url_for("sessions.checkin_view", id=session_id))
 
+    session = Session.query.get(session_id)
+
     record = AttendanceRecord(
         user_id=user_id,
         session_id=session_id,
-        date=date.today(),
+        date=session.date,  # ensures consistency with date
         status="present",
         service_number=service_number
     )
