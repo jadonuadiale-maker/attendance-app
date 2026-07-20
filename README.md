@@ -52,14 +52,6 @@ The church runs three class groups:
 The system automatically creates one session per class group per Sunday.  
 Each session contains attendance for Service 1, Service 2, or both, depending on what the member selects during check‑in.
 
-Teachers and admins can:
-- view today’s session instantly  
-- see who has checked in  
-- manually mark late arrivals or absences  
-- delete or modify sessions in exceptional cases (e.g., class cancelled, combined service)  
-
-This replaces the need for teachers to send attendance updates in group chats.
-
 ## 👩‍🏫 Teacher & Admin Control
 Although the system automates most of the workflow, teachers and admins retain full control:
 
@@ -83,6 +75,185 @@ This design:
 - scales across ministries and campuses  
 
 It is a direct technological evolution of the current system — not a replacement of the workflow, but an upgrade of it.
+
+# 🖥️ Tech Stack
+- Backend: Flask  
+- Database: SQLAlchemy + Flask-Migrate (SQLite for dev)  
+- Frontend: HTML, Bootstrap  
+- Templating: Jinja2  
+- Version Control: Git + GitHub  
+
+# Setup Instructions
+### Environment Variables
+Create a `.env` file or set environment variables:
+`SECRET-KEY=your_secret_key`
+`DATABASE_URL=sqlite:///attendance.db`
+### Running the App
+```flask run``` or ```python app.py```
+### Database Migrations
+Initialise migrations:
+```flask db init```
+Create migrations:
+```flask db migrate -m "initial tables"```
+Apply migration:
+```flask db upgrade```
+### Seeding Admin + Teacher
+```python seed.py```
+This creates:
+- Admin user (System Admin)
+- Teacher user (John Doe, assigned to classgroup_id=1)
+
+# System Architecture
+
+## Models
+### User
+Fields:
+- first_name
+- surname
+- full_name
+- date_of_birth
+- date_joined
+- classgroup_id
+- password_hash
+- role(admin, teacher, member)
+Relationships:
+- belongs to ClassGroup
+- has many AttendanceRecords
+### ClassGroup
+Fields:
+- id
+- name
+Relationships:
+- has many Sessions
+- has many Users
+### Session
+Fields:
+- id
+- classgroup_id
+- date 
+- topic
+- description
+Constraints: 
+- unique (classgroup_id, date)
+### AttendanceRecord
+Fields:
+- id
+- user_id
+- session_id
+- date
+- status (present, absent, late)
+- service_number (1, 2, 3 for both)
+
+## Architecture Notes
+### Session Logic
+- Auto-creation runs daily or manually via `/sessions/auto_create`.
+- Prevents duplicates using technique constraint and query checks. 
+- Sessions are tied to class groups.
+- Check‑in pads only work for today’s sessions.
+- Teachers can only view sessions for their assigned class group.
+- Duplicate check‑ins are rejected.
+- Admins can override attendance status and service number.
+### RBAC(Role-Based Access Control)
+Roles: 
+- admin
+- teacher
+- member
+Mechanics: 
+- Login stores `user_id` and `role`in session. 
+- `login_required` protects all internal pages. 
+- `role-required` restricts admin/teacher pages. 
+- Teachers are scoped to their class group in sessions and attendance views. 
+### Attendance Flow
+- Members select service number (1, 2, 3).
+- Duplicate check-ins are blocked. 
+- First timer create a profile and are auto-assigned to a class group based on DOB.
+- Attendance is stored in the correct session for today. 
+- Admin override allows fixing mistakes. 
+- Attendance marking page allows manual updates. 
+### Reports System
+Reports include: 
+#### Weekly 
+- service loads
+- late
+- absent
+- both services
+- class group filters
+#### Monthly
+- service loads
+- late 
+- absent
+- class group filters
+#### Yearly 
+- first timers
+- service loads
+- late 
+- absent
+#### Retention
+- users absent for N weeks
+- class group filters
+#### First Timers
+- users whose date_joined == attendance date
+#### Operations
+- raw attendance for a specific date/service/classgroup
+
+## API Routes
+### Auth 
+- GET `/login`
+- POST `/login`
+- GET `/logout`
+### Users
+- GET `/users`
+- GET `/users/search`
+- GET `/users/search_by_group`
+- GET `/first_timer/<session_id>`
+- POST `/first_timer/submit`
+- GET `/admin/users/create`
+- POST `/admin/users/submit`
+### ClassGroups
+- GET `/classgroups` 
+- POST `/classgroups`  
+- GET `/classgroups/<id>`  
+- DELETE `/classgroups/<id>`  
+- GET `/classes/view`  
+- GET `/classes`
+### Sessions
+- GET `/sessions`  
+- GET `/sessions/view`  
+- GET `/classgroups/<id>/sessions`  
+- POST `/classgroups/<id>/sessions`  
+- POST `/sessions/create`  
+- GET `/sessions/<id>/view`  
+- GET `/sessions/<id>`  
+- GET `/sessions/<id>/checkin/view`  
+- GET `/checkin/<user_id>/<session_id>`  
+- POST `/sessions/<session_id>/checkin`  
+- POST `/checkin/submit`  
+- POST `/attendance/<record_id>/override`  
+- GET `/sessions/<id>/attendance/view`  
+- GET `/sessions/auto_create`
+### Reports 
+- GET `/reports/weekly`  
+- GET `/reports/monthly`  
+- GET `/reports/yearly`  
+- GET `/reports/retention`  
+- GET `/reports/first_timers`  
+- GET `/reports/operations`
+
+## Screenshots
+Recommended screenshots(sort this later...):
+Dashboard
+Class groups page
+Sessions page
+Check‑in pad
+Check‑in detail
+First timer flow
+Attendance marking
+Weekly report
+Monthly report
+Yearly report
+Retention report
+First timers report
+Operations report
 
 # 🚀 Core Features (Current + Planned)
 
@@ -123,47 +294,6 @@ It is a direct technological evolution of the current system — not a replaceme
 - Multiple teachers  
 - Unlimited sessions  
 - Clean relational database design  
-
-# 🧱 System Architecture (High‑Level)
-
-## Models
-
-### User
-- first_name  
-- surname  
-- full_name (auto‑generated)  
-- date_of_birth  
-- classgroup_id (auto‑assigned based on age)  
-- date_joined  
-- role (admin / teacher / member)
-
-### ClassGroup
-- name (2–6, 7–12, Teens)  
-- description  
-- relationships to users and sessions  
-
-### Session
-- classgroup_id  
-- date (Sunday)  
-- topic (shared across both services)  
-- auto‑created weekly  
-- editable by admin/teacher  
-
-### AttendanceRecord
-- user_id  
-- session_id  
-- service_number (1 or 2 or both)  
-- status (present / absent / late)  
-- timestamp  
-
-This structure allows unlimited scalability and clean analytics.
-
-# 🖥️ Tech Stack
-- Backend: Flask  
-- Database: SQLAlchemy (SQLite for dev)  
-- Frontend: HTML, Bootstrap  
-- Templating: Jinja2  
-- Version Control: Git + GitHub  
 
 ## Project Reset (June 30 2026)
 This version begins the structured rebuild of the Attendance App.  
