@@ -1,0 +1,30 @@
+/* --- Global spacing + typography --- */
+.page-title {
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+/* --- Unified card shadow --- */
+.card {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* --- Table header consistency --- */
+.table thead {
+    background-color: #e8f5e9; /* soft green */
+}
+
+/* --- Button hierarchy --- */
+.btn-primary { font-weight: 500; }
+.btn-danger { font-weight: 500; }
+.btn-success { font-weight: 500; }
+
+/* --- Mobile table scroll --- */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* --- Consistent section spacing --- */
+.section {
+    margin-bottom: 2rem;
+}

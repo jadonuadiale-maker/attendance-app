@@ -13,7 +13,7 @@
 <div class="d-flex flex-wrap gap-2 mb-2">
     {% for s in sessions %}
         <a href="{{ url_for('sessions.attendance_view', id=s.id) }}" class="btn btn-primary">
-            Mark Attendance — {{ s.topic }} ({{ s.id }})  <!-- Change this later to accomodate for specific classgroups -->
+            Mark Attendance — {{ s.topic }} ({{ s.date }})  <!-- Change this later to accomodate for specific classgroups -->
         </a>
     {% endfor %}
 </div>
@@ -21,29 +21,31 @@
 
 
 <!-- Attendance table -->
-<table class="table table-striped table-bordered">
-    <thead class="table-success">
-        <tr>
-            <th>User</th>
-            <th>Session</th>
-            <th>Date</th>
-            <th>Service</th>
-            <th>Status</th>
-        </tr>
-    </thead>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead class="table-success">
+            <tr>
+                <th>User</th>
+                <th>Session</th>
+                <th>Date</th>
+                <th>Service</th>
+                <th>Status</th>
+            </tr>
+        </thead>
 
-    <tbody>
-        <!-- Loop through attendance records -->
-        {% for record in records %}
-        <tr>
-            <!-- Display related user, session, date, and service number -->
-            <td>{{ record.user.full_name }}</td>
-            <td>{{ record.session.topic }}</td>
-            <td>{{ record.date }}</td>
-            <td>{{ record.service_number }}</td>
-            <td>{{ record.status }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <tbody>
+            <!-- Loop through attendance records -->
+            {% for record in records %}
+            <tr>
+                <!-- Display related user, session, date, and service number -->
+                <td>{{ record.user.full_name }}</td>
+                <td>{{ record.session.topic }}</td>
+                <td>{{ record.date }}</td>
+                <td>{{ record.service_number }}</td>
+                <td>{{ record.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

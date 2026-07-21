@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, render_template, url_for, redirect, session as flask_session # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: for html page view. 
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import AttendanceRecord, User, Session, ClassGroup                     # model representing an individual teaching session belonging to a class group.
-from datetime import date
+from datetime import date, datetime
 from utils.auth_utils import login_required, role_required
 
 # These imports connect Flask's routing tooks, the database layer, and the Session model.
@@ -250,7 +250,7 @@ def submit_checkin():
     record = AttendanceRecord(
         user_id=user_id,
         session_id=session_id,
-        date=session.date,  # ensures consistency with date
+        date=datetime.strptime(session.date, "%Y-%m-%d").date(),  # convert string → date
         status="present",
         service_number=service_number
     )

@@ -146,4 +146,4 @@ def search_users():
 
 # APP RUNNER.
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=True)
