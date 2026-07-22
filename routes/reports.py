@@ -42,7 +42,7 @@ def weekly_health_report():
     if classgroup_id:
         query = query.join(Session).filter(Session.classgroup_id == classgroup_id)
 
-    records = query.all()
+    records = query.join(User).filter(User.role == "member").all()
 
     # Metrics
     total = len(records)
@@ -108,7 +108,7 @@ def monthly_trends_report():
     if classgroup_id:
         query = query.join(Session).filter(Session.classgroup_id == classgroup_id)
 
-    records = query.all()
+    records = query.join(User).filter(User.role == "member").all()
 
     total = len(records)
     # Raw categories. 
@@ -169,7 +169,7 @@ def yearly_growth_report():
     if classgroup_id:
         query = query.join(Session).filter(Session.classgroup_id == classgroup_id)
 
-    records = query.all()
+    records = query.join(User).filter(User.role == "member").all()
 
     total = len(records)
     # Raw categories.
@@ -229,7 +229,7 @@ def retention_report():
 
     # Users with no attendance since cutoff_date
     # Simple version: users whose latest attendance is before cutoff_date
-    users = User.query.all()
+    users = User.query.filter_by(role="member").all()
     drifting = []
 
     for u in users:
@@ -285,7 +285,7 @@ def first_timers_report():
     if classgroup_id:
         query = query.join(Session).filter(Session.classgroup_id == classgroup_id)
 
-    records = query.all()
+    records = query.join(User).filter(User.role == "member").all()
     first_timers = [
         r for r in records
         if r.user and r.user.date_joined == r.date
@@ -332,7 +332,7 @@ def operations_report():
     if classgroup_id:
         query = query.join(Session).filter(Session.classgroup_id == classgroup_id)
 
-    records = query.all()
+    records = query.join(User).filter(User.role == "member").all()      # Only members attendance are recorded. 
 
     total = len(records)
 

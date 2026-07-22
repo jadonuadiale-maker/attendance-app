@@ -1,8 +1,8 @@
 """Initial Schema
 
-Revision ID: 84763bfe73da
+Revision ID: 201c74301d2d
 Revises: 
-Create Date: 2026-07-15 12:10:23.349256
+Create Date: 2026-07-22 12:23:22.661368
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '84763bfe73da'
+revision = '201c74301d2d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,15 +21,18 @@ def upgrade():
     op.create_table('classgroups',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
     op.create_table('sessions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('classgroup_id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.String(length=50), nullable=False),
+    sa.Column('date', sa.Date(), nullable=False),
     sa.Column('topic', sa.String(length=200), nullable=True),
     sa.Column('description', sa.String(length=255), nullable=True),
+    sa.Column('start_time', sa.Time(), nullable=True),
+    sa.Column('end_time', sa.Time(), nullable=True),
     sa.ForeignKeyConstraint(['classgroup_id'], ['classgroups.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('classgroup_id', 'date', name='unique_group_date')

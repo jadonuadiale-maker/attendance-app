@@ -16,7 +16,7 @@ def auto_create_sessions(mode="daily"):
 
         existing = Session.query.filter_by(
             classgroup_id=group.id,
-            date=str(today)
+            date=today
         ).first()                   # Prevent duplicate sessions for the same day.
 
         if existing:
@@ -24,9 +24,12 @@ def auto_create_sessions(mode="daily"):
 
         session = Session(
             classgroup_id=group.id,
-            date=str(today),
-            topic="Auto‑generated session"
+            date=today,
+            topic="Auto‑generated session",
+            start_time=datetime.strptime("09:00", "%H:%M").time(),      # Default service times. 
+            end_time=datetime.strptime("12:30", "%H:%M").time()
         )
+
         db.session.add(session)
         created.append(session)
 

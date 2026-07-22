@@ -48,6 +48,9 @@ class ClassGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
 
+    # Soft delete flag (prevents accidental data loss)
+    is_active = db.Column(db.Boolean, default=True)
+
     # Relationship: one class group -> many sessions. 
     sessions = db.relationship("Session", backref="classgroup", lazy=True)
 
@@ -65,9 +68,16 @@ class Session(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     classgroup_id = db.Column(db.Integer, db.ForeignKey("classgroups.id"), nullable=False)
-    date = db.Column(db.String(50), nullable=False)
+
+    # Store date as proper Date type for consistency.
+    date = db.Column(db.Date, nullable=False)
+
     topic = db.Column(db.String(200))
     description = db.Column(db.String(255))  # Optional field for future expansion. 
+
+    # Closing time support
+    start_time = db.Column(db.Time)
+    end_time = db.Column(db.Time)
 
     __table_args__ = (
         db.UniqueConstraint('classgroup_id', 'date', name='unique_group_date'),
