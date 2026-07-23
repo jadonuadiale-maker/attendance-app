@@ -39,6 +39,11 @@ def submit_first_timer():
     dob_raw = request.form.get("date_of_birth")
     session_id_from_pad = int(request.form.get("session_id"))
     service_number = int(request.form.get("service_number"))
+    gender = request.form.get("gender")
+    email = request.form.get("email")
+    phone_number = request.form.get("phone_number")
+    consent_given = bool(request.form.get("consent_given"))
+
 
     dob = datetime.strptime(dob_raw, "%Y-%m-%d").date() if dob_raw else None
 
@@ -78,7 +83,11 @@ def submit_first_timer():
         full_name=f"{first_name} {surname}",
         date_of_birth=dob,
         date_joined=date.today(),
-        classgroup_id=assigned_group.id
+        classgroup_id=assigned_group.id,
+        gender=gender,
+        email=email,
+        phone_number=phone_number,
+        consent_given=consent_given
     )
 
     # --- Add and commit user ---
@@ -156,13 +165,22 @@ def admin_submit_user():
     dob = datetime.strptime(dob_raw, "%Y-%m-%d").date() if dob_raw else None
     assigned_group = assign_classgroup_from_dob(dob)
 
+    gender = request.form.get("gender")
+    email = request.form.get("email")
+    phone_number = request.form.get("phone_number")
+    consent_given = bool(request.form.get("consent_given"))
+
     user = User(
         first_name=first_name,
         surname=surname,
         full_name=f"{first_name} {surname}",
         date_of_birth=dob,
         date_joined=date.today(),
-        classgroup_id=assigned_group.id if assigned_group else None
+        classgroup_id=assigned_group.id if assigned_group else None,
+        gender=gender,
+        email=email,
+        phone_number=phone_number,
+        consent_given=consent_given
     )
 
     db.session.add(user)

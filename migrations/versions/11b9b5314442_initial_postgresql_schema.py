@@ -1,8 +1,8 @@
-"""Initial Schema
+"""Initial PostgreSQL Schema
 
-Revision ID: 201c74301d2d
+Revision ID: 11b9b5314442
 Revises: 
-Create Date: 2026-07-22 12:23:22.661368
+Create Date: 2026-07-23 12:04:33.864417
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '201c74301d2d'
+revision = '11b9b5314442'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -44,6 +44,10 @@ def upgrade():
     sa.Column('full_name', sa.String(length=200), nullable=False),
     sa.Column('date_of_birth', sa.Date(), nullable=True),
     sa.Column('date_joined', sa.Date(), nullable=False),
+    sa.Column('gender', sa.String(length=20), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('phone_number', sa.String(length=20), nullable=True),
+    sa.Column('consent_given', sa.Boolean(), nullable=True),
     sa.Column('classgroup_id', sa.Integer(), nullable=True),
     sa.Column('password_hash', sa.String(length=256), nullable=True),
     sa.Column('role', sa.String(length=20), nullable=True),

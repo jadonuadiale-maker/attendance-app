@@ -1,33 +1,36 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_migrate import Migrate
+from apscheduler.schedulers.background import BackgroundScheduler
+from utils.session_auto import auto_create_sessions
 from datetime import date, datetime
 from extensions import db
 from models import *
 from routes.classgroups import classgroups_bp
 from routes.sessions import sessions_bp
-from routes.users import users_bp
+from routes.users import users_bp, assign_classgroup_from_dob 
 from routes.auth import auth_bp
 from routes.reports import reports_bp
 from utils.auth_utils import login_required, role_required
 
-def assign_classgroup_from_dob(dob):
-    today = date.today()
-    age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-    if 2 <= age <= 6:
-        return ClassGroup.query.filter_by(name="2-6").first()
-    elif 7 <= age <= 12:
-        return ClassGroup.query.filter_by(name="7-12").first()
-    else:
-        return ClassGroup.query.filter_by(name="Teens").first()
-
-
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET-KEY", os.urandom(24))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
+app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+scheduler = BackgroundScheduler()
+
+def run_auto_create():
+    with app.app_context():
+        auto_create_sessions()
+
+scheduler.add_job(run_auto_create, 'interval', minutes=1)
 
 # BLUEPRINT REGISTRATION.
 # Class groups and session routes are modlurized into
@@ -146,4 +149,5 @@ def search_users():
 
 # APP RUNNER.
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True)
+    scheduler.start()
+    app.run(debug=False)

@@ -14,6 +14,11 @@ class User(db.Model):
     full_name = db.Column(db.String(200), nullable=False)
     date_of_birth = db.Column(db.Date)
     date_joined = db.Column(db.Date, nullable=False)
+    gender = db.Column(db.String(20))
+    email = db.Column(db.String(120))
+    phone_number = db.Column(db.String(20))
+    consent_given = db.Column(db.Boolean, default=False)
+
 
     # NEW - required for class group filtering.
     classgroup_id = db.Column(db.Integer, db.ForeignKey('classgroups.id'), nullable=True)
@@ -37,7 +42,12 @@ class User(db.Model):
             "surname": self.surname,
             "full_name": self.full_name,
             "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
-            "date_joined": self.date_joined.isoformat()
+            "date_joined": self.date_joined.isoformat(),
+            "gender": self.gender,
+            "email": self.email,
+            "phone_number": self.phone_number,
+            "consent_given": self.consent_given
+
         }
 
 # CLASS GROUP MODEL.

@@ -28,14 +28,6 @@
 </form>
 {% endif %}
 
-<!-- Auto Creation for session -->
- {% if session.role == "admin" %}
-<a href="{{ url_for('sessions.auto_create') }}" class="btn btn-warning mb-3">
-    Auto-Create Today's Sessions
-</a>
-{% endif %}
-
-
 <!-- Sessions table -->
 <table class="table table-striped table-bordered">
   <thead class="table-success">
