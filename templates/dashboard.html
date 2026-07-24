@@ -8,7 +8,7 @@
     {% for id, data in summary.items() %}
     <div class="card mb-4 shadow-sm">
         <div class="card-header">
-            <strong>{{ data.group_name }}</strong> — Session {{ id }}
+            <strong>{{ data.group_name }}</strong> — {{ data.session.date }}
         </div>
 
         <div class="card-body">
@@ -28,10 +28,17 @@
             <hr>
 
             <a href="{{ url_for('sessions.attendance_view', id=data.session.id) }}"
-               class="btn btn-primary btn-sm">
-                View Attendance
-            </a>
+            class="btn btn-primary btn-sm">View Attendance</a>
+
+            <a href="{{ url_for('reports.operations_report',
+                                classgroup_id=data.session.classgroup_id,
+                                date=data.session.date) }}"
+            class="btn btn-secondary btn-sm">Operations Report</a>
+
+            <a href="{{ url_for('sessions.checkin_view', id=data.session.id) }}"
+            class="btn btn-success btn-sm">Check-In Pad</a>
         </div>
+
     </div>
     {% endfor %}
 {% else %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{{ report.title }}</h1>
+
+<!-- Filter panel -->
+<form method="GET" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <label class="form-label">Class Group</label>
+        <select name="classgroup_id" class="form-select">
+            <option value="">All</option>
+            {% for group in groups %}
+                <option value="{{ group.id }}"
+                    {% if report.filters.classgroup_id == group.id %}selected{% endif %}>
+                    {{ group.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% if active_tab in ["weekly", "operations"] %}
+    <div class="col-md-3">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control"
+               value="{{ report.filters.date or '' }}">
+    </div>
+    {% endif %}
+
+    {% if active_tab in ["weekly"] %}
+    <div class="col-md-3">
+        <label class="form-label">Week Start</label>
+        <input type="date" name="week_start" class="form-control"
+               value="{{ report.filters.week_start }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Week End</label>
+        <input type="date" name="week_end" class="form-control"
+               value="{{ report.filters.week_end }}">
+    </div>
+    {% endif %}
+
+    {% if active_tab in ["monthly", "first_timers"] %}
+    <div class="col-md-3">
+        <label class="form-label">Month</label>
+        <input type="number" name="month" class="form-control"
+               value="{{ report.filters.month or '' }}" min="1" max="12">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Year</label>
+        <input type="number" name="year" class="form-control"
+               value="{{ report.filters.year or '' }}">
+    </div>
+    {% endif %}
+
+    {% if active_tab == "retention" %}
+    <div class="col-md-3">
+        <label class="form-label">Weeks Absent</label>
+        <input type="number" name="weeks_absent" class="form-control"
+               value="{{ report.filters.weeks_absent or 4 }}">
+    </div>
+    {% endif %}
+
+    {% if active_tab == "operations" %}
+    <div class="col-md-3">
+        <label class="form-label">Service</label>
+        <select name="service_number" class="form-select">
+            <option value="">All</option>
+            <option value="1" {% if report.filters.service_number == 1 %}selected{% endif %}>1st Service</option>
+            <option value="2" {% if report.filters.service_number == 2 %}selected{% endif %}>2nd Service</option>
+            <option value="3" {% if report.filters.service_number == 3 %}selected{% endif %}>Both</option>
+        </select>
+    </div>
+    {% endif %}
+
+    <div class="col-md-3 align-self-end">
+        <button class="btn btn-primary w-100">Apply Filters</button>
+    </div>
+</form>
+
+<!-- Metrics summary -->
+<div class="row mb-4">
+    {% for key, value in report.metrics.items() %}
+    <div class="col-md-3 mb-2">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-muted">{{ key|replace("_", " ")|title }}</h6>
+                 <p class="card-text fs-4
+                    {% if key == 'late' %}text-warning{% endif %}
+                    {% if key == 'absent' %}text-danger{% endif %}
+                    {% if key == 'service1_load' %}text-primary{% endif %}
+                    {% if key == 'service2_load' %}text-success{% endif %}
+                    {% if key == 'first_timers' %}text-purple{% endif %}
+                ">
+                    {{ value }}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Empty state -->
+{% if report.records|length == 0 %}
+<div class="alert alert-info mt-3">
+    No records found for the selected filters.
+</div>
+{% endif %}
+
+<!-- Raw records table -->
+<h3 class="mt-4 mb-3">Records</h3>
+<table class="table table-striped table-bordered">
+    <thead class="table-success">
+        <tr>
+            <th>User</th>
+            <th>Class Group</th>
+            <th>Date</th>
+            <th>Service</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in report.records %}
+        <tr>
+            <td>{{ r.user.full_name if r.user else "Unknown" }}</td>
+            <td>{{ r.session.classgroup.name if r.session and r.session.classgroup else "Unknown" }}</td>
+            <td>{{ r.date }}</td>
+            <td>{{ r.service_number }}</td>
+            <td>{{ r.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
