@@ -48,7 +48,7 @@
 
                 <!-- Reports dropdown -->
                 <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle {% if 'reports' in request.endpoint %}fw-bold text-primary{% endif %}"
+                    <a class="nav-link dropdown-toggle {% if request.endpoint and 'reports' in request.endpoint %}fw-bold text-primary{% endif %}"
                         data-bs-toggle="dropdown" href="#">Reports</a>
 
                     <ul class="dropdown-menu">

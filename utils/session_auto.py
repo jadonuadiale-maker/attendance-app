@@ -13,7 +13,7 @@ def auto_create_sessions(mode="daily"):
     logging.info(f"Auto-create triggered at {datetime.now()} for {len(groups)} groups.")
 
     for group in groups:
-        schedule_days = ["Sunday", "Thursday"]      # Placeholder schedule — later stored per ClassGroup.
+        schedule_days = ["Sunday", "Friday"]      # Placeholder schedule — later stored per ClassGroup.
         weekday = today.strftime("%A")  # Convert date → weekday name (e.g., "Sunday").
 
         if weekday not in schedule_days:

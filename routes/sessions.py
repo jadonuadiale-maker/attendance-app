@@ -228,7 +228,7 @@ def submit_checkin():
     record = AttendanceRecord(
         user_id=user_id,
         session_id=session_id,
-        date=datetime.strptime(session.date, "%Y-%m-%d").date(),  # convert string → date
+        date=session.date,  
         status="present",
         service_number=service_number
     )

@@ -1,6 +1,8 @@
-import os
+import os, logging
 from dotenv import load_dotenv
 load_dotenv()
+logging.basicConfig(level=logging.INFO)
+
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_migrate import Migrate
@@ -30,7 +32,7 @@ def run_auto_create():
     with app.app_context():
         auto_create_sessions()
 
-scheduler.add_job(run_auto_create, 'interval', minutes=1)
+scheduler.add_job(run_auto_create, 'cron', day_of_week='sun', hour=8,  minute=45)
 
 # BLUEPRINT REGISTRATION.
 # Class groups and session routes are modlurized into
@@ -51,7 +53,7 @@ def index():
 @login_required
 @role_required("admin", "teacher")
 def dashboard():
-    today = date.today().isoformat()
+    today = date.today()
 
     # --- Role-aware session filtering ---
     role = session.get("role")
@@ -97,30 +99,6 @@ def users():
     all_users = User.query.all()
     return render_template('users.html', users=all_users)
 
-# ADD USER - Form Submission.
-@app.route('/add_user', methods=['POST'])
-def add_user():
-    first = request.form['first_name']
-    surname = request.form['surname']
-    dob_raw = request.form.get('date_of_birth')
-    dob = datetime.strptime(dob_raw, "%Y-%m-%d").date() if dob_raw else None
-
-    group = assign_classgroup_from_dob(dob)
-
-    user = User(
-        first_name=first,
-        surname=surname,
-        full_name=f"{first} {surname}",
-        date_of_birth=dob,
-        date_joined=date.today(),
-        classgroup_id=group.id if group else None
-    )
-
-    db.session.add(user)
-    db.session.commit()
-    return redirect(url_for('users'))
-
-
 # DELETE USER - Utility Route (admin only).
 @app.route('/delete_user/<int:id>', methods=['POST'])
 @login_required
@@ -146,6 +124,17 @@ def search_users():
     q = request.args.get("q", "")
     users = User.query.filter(User.full_name.ilike(f"%{q}%")).all()
     return jsonify([u.to_dict() for u in users])
+
+# --- Global error handlers ---
+@app.errorhandler(404)
+def not_found(e):
+    app.logger.warning(f"404 error: {e}")  # optional logging
+    return render_template("error.html", message="Page not found."), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    app.logger.error(f"500 error: {e}")  # optional logging
+    return render_template("error.html", message="An unexpected error occurred."), 500
 
 # APP RUNNER.
 if __name__ == '__main__':
