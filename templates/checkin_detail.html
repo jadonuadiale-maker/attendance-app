@@ -4,17 +4,19 @@
 {% block content %}
 <h2>Check-In for {{ user.full_name }}</h2>
 
-<form action="{{ url_for('sessions.submit_checkin') }}" method="POST">
-    <input type="hidden" name="user_id" value="{{ user.id }}">
-    <input type="hidden" name="session_id" value="{{ session.id }}">
+<div class="card p-3">
+    <form action="{{ url_for('sessions.submit_checkin') }}" method="POST">
+        <input type="hidden" name="user_id" value="{{ user.id }}">
+        <input type="hidden" name="session_id" value="{{ session.id }}">
 
-    <label>Select Service:</label>
-    <select name="service_number" class="form-select mb-3">
-        <option value="1">1st Service</option>
-        <option value="2">2nd Service</option>
-        <option value="3">Both</option>
-    </select>
+        <label>Select Service:</label>
+        <select name="service_number" class="form-select mb-3">
+            <option value="1">1st Service</option>
+            <option value="2">2nd Service</option>
+            <option value="3">Both</option>
+        </select>
 
-    <button class="btn btn-success">Submit</button>
-</form>
+        <button class="btn btn-success">Submit</button>
+    </form>
+</div>
 {% endblock %}

@@ -10,17 +10,20 @@ users_bp = Blueprint("users", __name__)
 def assign_classgroup_from_dob(dob):
     # --- Simple age-based mapping (placeholder logic) ---
     if not dob:
-        return ClassGroup.query.filter_by(name="Teens").first()  # default
+        return None                                  # default
 
     today = date.today()
     age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
 
+    if age < 2 or age > 20:
+        return None
+
     if 2 <= age <= 6:
-        return ClassGroup.query.filter_by(name="2-6").first()
+        return ClassGroup.query.filter_by(name="2-6", is_active=True).first()
     elif 7 <= age <= 12:
-        return ClassGroup.query.filter_by(name="7-12").first()
-    elif age >= 13:
-        return ClassGroup.query.filter_by(name="Teens").first()
+        return ClassGroup.query.filter_by(name="7-12", is_active=True).first()
+    elif 13 <= age <= 20:
+        return ClassGroup.query.filter_by(name="Teens", is_active=True).first()
 
 
 @users_bp.route("/first_timer/<int:session_id>")
@@ -36,8 +39,28 @@ def submit_first_timer():
     dob_raw = request.form.get("date_of_birth")
     session_id_from_pad = int(request.form.get("session_id"))
     service_number = int(request.form.get("service_number"))
+    gender = request.form.get("gender")
+    email = request.form.get("email")
+    phone_number = request.form.get("phone_number")
+    consent_given = bool(request.form.get("consent_given"))
+
 
     dob = datetime.strptime(dob_raw, "%Y-%m-%d").date() if dob_raw else None
+
+    # Age validation (2-20)
+    if dob:
+        today = date.today()
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+        if age < 2:
+            return render_template("error.html", message="Age must be at least 2.")
+        if age > 20:
+            return render_template("error.html", message="Age exceeds supported range.")
+        
+    # Assign class group BEFORE commiting user
+    assigned_group = assign_classgroup_from_dob(dob)
+    if not assigned_group or not assigned_group.is_active:
+        return render_template("error.html", message="Class group is inactive or unavailable.")
 
     # --- Check if user already exists (case-insensitive name match only) ---
     existing_user = User.query.filter(
@@ -59,20 +82,20 @@ def submit_first_timer():
         surname=surname,
         full_name=f"{first_name} {surname}",
         date_of_birth=dob,
-        date_joined=date.today()
+        date_joined=date.today(),
+        classgroup_id=assigned_group.id,
+        gender=gender,
+        email=email,
+        phone_number=phone_number,
+        consent_given=consent_given
     )
 
     # --- Add and commit user ---
     db.session.add(user)
     db.session.commit()
-
-    # --- Assign correct class group based on DOB ---
-    assigned_group = assign_classgroup_from_dob(dob)
-    user.classgroup_id = assigned_group.id
-    db.session.commit()
     
     # --- Fetch today's session for assigned class group ---
-    today = date.today().isoformat()
+    today = date.today()
 
     correct_session = Session.query.filter_by(
         classgroup_id=assigned_group.id,
@@ -115,6 +138,7 @@ def search_by_group():
 
     users = User.query.filter(
         User.classgroup_id == group_id,
+        User.role == "member",
         User.full_name.ilike(f"%{q}%")
     ).order_by(User.full_name.asc()).all()
 
@@ -141,13 +165,22 @@ def admin_submit_user():
     dob = datetime.strptime(dob_raw, "%Y-%m-%d").date() if dob_raw else None
     assigned_group = assign_classgroup_from_dob(dob)
 
+    gender = request.form.get("gender")
+    email = request.form.get("email")
+    phone_number = request.form.get("phone_number")
+    consent_given = bool(request.form.get("consent_given"))
+
     user = User(
         first_name=first_name,
         surname=surname,
         full_name=f"{first_name} {surname}",
         date_of_birth=dob,
         date_joined=date.today(),
-        classgroup_id=assigned_group.id if assigned_group else None
+        classgroup_id=assigned_group.id if assigned_group else None,
+        gender=gender,
+        email=email,
+        phone_number=phone_number,
+        consent_given=consent_given
     )
 
     db.session.add(user)

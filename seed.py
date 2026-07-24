@@ -1,5 +1,5 @@
 from extensions import db
-from models import User
+from models import User, ClassGroup
 from app import app
 from datetime import date
 
@@ -27,7 +27,13 @@ with app.app_context():
 
     # --- Assign teacher to a class group (IMPORTANT) ---
     # Ensure classgroup with id=1 exists (e.g., "2-6")
-    teacher.classgroup_id = 1
+    group = ClassGroup.query.filter_by(name="2-6").first()
+    if not group:
+        group = ClassGroup(name="2-6", is_active=True)
+        db.session.add(group)
+        db.session.commit()
+
+    teacher.classgroup_id = group.id
 
     db.session.add(teacher)
 

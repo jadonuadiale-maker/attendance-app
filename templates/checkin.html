@@ -10,7 +10,7 @@
 <input id="user-search" class="form-control" placeholder="Type your name">
 
 <!-- Autocomplete results -->
-<ul id="results" class="list-group mt-2"></ul>
+<ul id="results" class="list-group-item"></ul>
 
 <hr>
 
@@ -18,13 +18,11 @@
 <h4>All Members</h4>
 <ul class="list-group">
     {% for user in users %}
-        <li class="list-group-item">
-            <div class="card p-2">
-                <a class="fw-bold"
+        <li class="list-group-item p-0">
+                <a class="d-block p-2 fw-bold text-decoration-none"
                    href="{{ url_for('sessions.checkin_detail', user_id=user.id, session_id=session_id) }}">
                     {{ user.full_name }}
                 </a>
-            </div>
         </li>
     {% endfor %}
 </ul>
@@ -56,13 +54,14 @@ document.getElementById("user-search").addEventListener("keyup", (e) => {
 
         users.forEach(u => {
             const li = document.createElement("li");
-            li.className = "list-group-item";
+            li.className = "list-group-item p-0";
             li.innerHTML = `
-                <div class="card p-2">
-                    <a class="fw-bold" href="/checkin/${u.id}/${document.getElementById('session-id').value}">
-                        ${u.full_name}
-                    </a>
-                </div>
+            <div class="card">
+                <a class="d-block p-2 fw-bold text-decoration-none text-primary"
+                href="/checkin/${u.id}/${document.getElementById('session-id').value}">
+                ${u.full_name}
+                </a>
+            </div>
             `;
             list.appendChild(li);
         });

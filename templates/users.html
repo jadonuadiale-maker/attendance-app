@@ -8,12 +8,28 @@
 
 <!-- Admin add user form -->
 <form action="{{ url_for('users.admin_submit_user') }}" method="POST" class="mb-4">
+
     <input name="first_name" class="form-control mb-2" placeholder="First Name" required>
     <input name="surname" class="form-control mb-2" placeholder="Surname" required>
     <input name="date_of_birth" type="date" class="form-control mb-2">
 
+    <select name="gender" class="form-select mb-2">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select>
+
+    <input name="email" type="email" class="form-control mb-2" placeholder="Email">
+
+    <input name="phone_number" class="form-control mb-2" placeholder="Phone Number">
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="consent_given" required>
+        <label class="form-check-label">I consent to my data being stored for attendance purposes.</label>
+    </div>
+
     <button class="btn btn-primary">Add User</button>
 </form>
+
 
 
  <!-- Users table -->
@@ -21,6 +37,10 @@
     <thead class="table-success">
         <tr>
             <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Gender</th>
+            <th>Consent</th>
             <th style="width: 120px;">Actions</th>
         </tr>
     </thead>
@@ -30,11 +50,18 @@
          {% for user in users %}
          <tr>
             <td> {{ user.full_name }} </td>
+            <td> {{ user.email }} </td>
+            <td> {{ user.phone_number }} </td>
+            <td> {{ user.gender }} </td>
+            <td> {{ "Yes" if user.consent_given else "No" }} </td>
             <td>
                 <!-- Delete user form -->
                  {% if session.role == "admin" %}
                  <form action="{{ url_for('delete_user', id=user.id) }}" method="POST">
-                    <button class="btn btn-danger btn-sm">Delete</button>
+                    <button class="btn btn-danger btn-sm"
+                            onclick="return confirm('Delete this user?');">
+                            Delete
+                    </button>
                  </form>
                  {% endif %}
             </td>

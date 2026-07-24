@@ -1,44 +1,16 @@
 from flask import Blueprint, jsonify, request, render_template, url_for, redirect, session as flask_session # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: for html page view. 
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import AttendanceRecord, User, Session, ClassGroup                     # model representing an individual teaching session belonging to a class group.
-from datetime import date
+from datetime import date, datetime
 from utils.auth_utils import login_required, role_required
+from utils.session_auto import auto_create_sessions
 
 # These imports connect Flask's routing tooks, the database layer, and the Session model.
 # Together, they allow this file to act as the dedicated API surface for session operations. 
 
-# --- AUTO-CREATE SESSIONS FOR TODAY ---
-def auto_create_sessions():
-    today = date.today().isoformat()
-    created_sessions = []
-    # Fetch all class groups (2-6, 7-12, Teens)
-    groups = ClassGroup.query.all()
-
-    for group in groups:
-        # Prevent duplicates
-        existing = Session.query.filter_by(
-            classgroup_id=group.id,
-            date=today
-        ).first()
-
-        if existing:
-            continue
-
-        # Create session for this group
-        session = Session(
-            classgroup_id=group.id,
-            date=today,
-            topic="Sunday Service"
-        )
-
-        db.session.add(session)
-        created_sessions.append(session)
-
-    db.session.commit()
-    return created_sessions
-
-
 sessions_bp = Blueprint('sessions', __name__)   # Creates a blueprint named "sessions"
+
+created = auto_create_sessions                  # Auto created sessions stored. 
 
 # Simple session overview route.
 @sessions_bp.route("/sessions", methods=["GET"])
@@ -71,9 +43,12 @@ def get_sessions(group_id):
 def create_session_html():
     data = request.form
     group_id = data.get('group_id')
+
+    session_date = datetime.strptime(data['date'], "%Y-%m-%d").date()
+
     session = Session(
         classgroup_id=group_id,
-        date=data['date'],
+        date=session_date,
         topic=data.get('topic')
     )
     db.session.add(session)
@@ -86,9 +61,12 @@ def create_session_html():
 @role_required("admin")
 def create_session_api(group_id):
     data = request.json                                              # reads the JSON payload sent by the client. 
+    
+    session_date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+
     session = Session(
         classgroup_id=group_id,   # taken from the URL
-        date=data["date"],        
+        date=session_date,        
         topic=data.get("topic")
     )
     db.session.add(session)                                          # adds the new session to the database session. 
@@ -133,7 +111,7 @@ def checkin_view(id):
     session = Session.query.get_or_404(id)
 
     # --- Ensure session is for today (avoids stale pads) ---
-    today = date.today().isoformat()
+    today = date.today()
     if session.date != today:
         return render_template(
             "error.html",
@@ -141,7 +119,7 @@ def checkin_view(id):
         )
 
     # --- Filter users by class group of this session(pad-specific view) ---
-    users = User.query.filter_by(classgroup_id=session.classgroup_id) \
+    users = User.query.filter_by(classgroup_id=session.classgroup_id, role="member") \
                       .order_by(User.full_name.asc()).all()
     return render_template("checkin.html", session_id=id, session=session, users=users)
 
@@ -160,7 +138,7 @@ def checkin_detail(user_id, session_id):
         )
 
     # --- Ensure session is for today ---
-    today = date.today().isoformat()
+    today = date.today()
     if session.date != today:
         return render_template(
             "error.html",
@@ -250,7 +228,7 @@ def submit_checkin():
     record = AttendanceRecord(
         user_id=user_id,
         session_id=session_id,
-        date=session.date,  # ensures consistency with date
+        date=session.date,  
         status="present",
         service_number=service_number
     )
