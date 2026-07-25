@@ -4,3 +4,4 @@ __pycache__/
 instance/
 attendance.db
 migrations/__pycache__/
+.env
