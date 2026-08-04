@@ -1,3 +1,5 @@
+import os
+from flask import abort
 from flask import Blueprint, jsonify, request, render_template, url_for, redirect, session as flask_session # Blueprint: groups related routes, jsonify: converts python data to JSON HTTP responses,request: gives access to incoming HTTP request data, render template: for html page view. 
 from extensions import db                      # db: SQLAlchemy database instance. 
 from models import AttendanceRecord, User, Session, ClassGroup                     # model representing an individual teaching session belonging to a class group.
@@ -7,6 +9,8 @@ from utils.session_auto import auto_create_sessions
 
 # These imports connect Flask's routing tooks, the database layer, and the Session model.
 # Together, they allow this file to act as the dedicated API surface for session operations. 
+
+CRON_TOKEN = os.environ.get("CRON_TOKEN")
 
 sessions_bp = Blueprint('sessions', __name__)   # Creates a blueprint named "sessions"
 
@@ -73,13 +77,14 @@ def create_session_api(group_id):
     db.session.commit()                                              # saves it permanently.
     return jsonify(session.to_dict()), 201                           # returns the newly created session with HTTP status 201 created. 
 
-# For Auto-Creation (admin only).
+# For Auto-Creation (Render cron job). 
 @sessions_bp.route("/sessions/auto_create", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
 def auto_create():
+    token = request.headers.get("X-CRON-TOKEN")
+    if token != CRON_TOKEN:
+        abort(403)  # Unauthorised. 
     created = auto_create_sessions()   # Only daily logic is needed. 
-    return redirect(url_for('sessions.sessions'))
+    return jsonify({"status": "ok", "created": created})
 
 # GET a single session. 
 
