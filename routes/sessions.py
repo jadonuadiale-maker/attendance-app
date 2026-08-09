@@ -77,14 +77,14 @@ def create_session_api(group_id):
     db.session.commit()                                              # saves it permanently.
     return jsonify(session.to_dict()), 201                           # returns the newly created session with HTTP status 201 created. 
 
-# For Auto-Creation (Render cron job). 
+# For Auto-Creation (Zapier schedule). 
 @sessions_bp.route("/sessions/auto_create", methods=["GET", "POST"])
 def auto_create():
     token = request.headers.get("X-CRON-TOKEN")
     if token != CRON_TOKEN:
         abort(403)  # Unauthorised. 
     created = auto_create_sessions()   # Only daily logic is needed. 
-    return jsonify({"status": "ok", "created": created})
+    return redirect(url_for('sessions.sessions'))
 
 # GET a single session. 
 
