@@ -84,7 +84,11 @@ def auto_create():
     if token != CRON_TOKEN:
         abort(403)  # Unauthorised. 
     created = auto_create_sessions()   # Only daily logic is needed. 
-    return redirect(url_for('sessions.sessions'))
+
+    return jsonify({
+        "status": "success",
+        "created_sessions": [s.to_dict() for s in created]
+    }), 200
 
 # GET a single session. 
 
