@@ -51,7 +51,7 @@ def index():
 # DASHBOARD PAGE (updated)
 @app.route('/dashboard')
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def dashboard():
     today = date.today()
 
@@ -59,7 +59,7 @@ def dashboard():
     role = session.get("role")
     user_id = session.get("user_id")
 
-    if role == "teacher":
+    if role == "pad":
         teacher = User.query.get(user_id)
         sessions = Session.query.filter_by(
             classgroup_id=teacher.classgroup_id,
@@ -94,7 +94,7 @@ def dashboard():
 # USER PAGE - List All Users.
 @app.route('/users')
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def users():
     all_users = User.query.all()
     return render_template('users.html', users=all_users)
@@ -112,7 +112,7 @@ def delete_user(id):
 # ATTENDANCE RECORDS PAGE.
 @app.route('/attendance')
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def attendance():
     records = AttendanceRecord.query.all()
     sessions = Session.query.all()

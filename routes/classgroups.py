@@ -13,7 +13,7 @@ classgroups_bp = Blueprint('classgroups', __name__)   # Creates a blueprint name
 # List all Class Groups for HTML page view.
 @classgroups_bp.route('/classes/view')
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def classes():
     groups = ClassGroup.query.all()
     return render_template('classes.html', groups=groups)

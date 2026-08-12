@@ -18,6 +18,7 @@ def login():
 
     session["user_id"] = user.id
     session["role"] = user.role
+    session["classgroup_id"] = user.classgroup_id
     return redirect(url_for("dashboard"))
 
 @auth_bp.route("/logout")

@@ -19,7 +19,7 @@ def parse_date(value):
 # WEEKLY REPORT.
 @reports_bp.route("/reports/weekly")
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def weekly_health_report():
     # Filters: optional classgroup_id, week_start, week_end
     classgroup_id = request.args.get("classgroup_id", type=int)
@@ -89,7 +89,7 @@ def weekly_health_report():
 # MONTHLY REPORT.
 @reports_bp.route("/reports/monthly")
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def monthly_trends_report():
     # Filters: month, year, optional classgroup_id
     month = request.args.get("month", type=int)
@@ -153,7 +153,7 @@ def monthly_trends_report():
 # ANNUAL REPORTS. 
 @reports_bp.route("/reports/yearly")
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def yearly_growth_report():
     # Filters: year, optional classgroup_id
     year = request.args.get("year", type=int)
@@ -219,7 +219,7 @@ def yearly_growth_report():
 # RETENTION REPORTS.
 @reports_bp.route("/reports/retention")
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def retention_report():
     # Filters: weeks_absent, optional classgroup_id
     weeks_absent = request.args.get("weeks_absent", type=int) or 4
@@ -265,7 +265,7 @@ def retention_report():
 # FIRST TIMERS REPORT. 
 @reports_bp.route("/reports/first_timers")
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def first_timers_report():
     # Filters: month/year or week, optional classgroup_id
     month = request.args.get("month", type=int)
@@ -314,7 +314,7 @@ def first_timers_report():
 # OPERATIONS REPORT.
 @reports_bp.route("/reports/operations")
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def operations_report():
     # Filters: classgroup_id, date, service_number
     classgroup_id = request.args.get("classgroup_id", type=int)

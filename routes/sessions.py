@@ -25,7 +25,7 @@ def sessions_overview():
 # Session overview route for HTML page. 
 @sessions_bp.route('/sessions/view', methods=['GET'])
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def sessions():
     from models import ClassGroup
     groups = ClassGroup.query.all()
@@ -95,7 +95,7 @@ def auto_create():
 # For HTML view. 
 @sessions_bp.route("/sessions/<int:id>/view", methods=["GET"])
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def view_session(id):
     session = Session.query.get_or_404(id)
 
@@ -270,7 +270,7 @@ def override_attendance(record_id):
 # Attendance Marking UI.
 @sessions_bp.route("/sessions/<int:id>/attendance/view")
 @login_required
-@role_required("admin", "teacher")
+@role_required("admin", "pad")
 def attendance_view(id):
     session = Session.query.get_or_404(id)
 
