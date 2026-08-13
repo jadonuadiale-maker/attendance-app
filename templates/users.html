@@ -1,72 +1,101 @@
 {% extends "base.html" %}
-
 {% block title %}Users{% endblock %}
 
 {% block content %}
-<!-- Page heading -->
- <h1 class="mb-4">Users</h1>
+<h1 class="mb-4">Users</h1>
 
-<!-- Admin add user form -->
-<form action="{{ url_for('users.admin_submit_user') }}" method="POST" class="mb-4">
+<!-- Add User Card (improves hierarchy + mobile readability) -->
+<div class="card mb-4 p-3">
+    <h5 class="mb-3">Add New User</h5>
 
-    <input name="first_name" class="form-control mb-2" placeholder="First Name" required>
-    <input name="surname" class="form-control mb-2" placeholder="Surname" required>
-    <input name="date_of_birth" type="date" class="form-control mb-2">
+    <!-- NOTE: Mobile browsers do not show placeholders for type="date" -->
+    <!-- So we add labels for clarity on iPad/phone -->
+    <form action="{{ url_for('users.admin_submit_user') }}" method="POST">
 
-    <select name="gender" class="form-select mb-2">
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-    </select>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">First Name</label>
+                <input name="first_name" class="form-control" required>
+            </div>
 
-    <input name="email" type="email" class="form-control mb-2" placeholder="Email">
+            <div class="col-md-6">
+                <label class="form-label">Surname</label>
+                <input name="surname" class="form-control" required>
+            </div>
 
-    <input name="phone_number" class="form-control mb-2" placeholder="Phone Number">
+            <div class="col-md-6">
+                <label class="form-label">Date of Birth</label>
+                <input name="date_of_birth" type="date" class="form-control">
+            </div>
 
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" name="consent_given" required>
-        <label class="form-check-label">I consent to my data being stored for attendance purposes.</label>
+            <div class="col-md-6">
+                <label class="form-label">Gender</label>
+                <select name="gender" class="form-select">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input name="email" type="email" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Phone Number</label>
+                <input name="phone_number" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" name="consent_given" required>
+            <label class="form-check-label">I consent to my data being stored for attendance purposes.</label>
+        </div>
+
+        <button class="btn btn-primary mt-3 w-100">Add User</button>
+    </form>
+</div>
+
+<!-- Users Table -->
+<div class="card p-3">
+    <h5 class="mb-3">Registered Users</h5>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered users-table">
+            <thead class="table-success">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Gender</th>
+                    <th>Consent</th>
+                    <th style="width: 120px;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.phone_number }}</td>
+                    <td>{{ user.gender }}</td>
+                    <td>{{ "Yes" if user.consent_given else "No" }}</td>
+                    <td>
+                        {% if session.role == "admin" %}
+                        <form action="{{ url_for('delete_user', id=user.id) }}" method="POST">
+                            <button class="btn btn-danger btn-sm w-100"
+                                    onclick="return confirm('Delete this user?');">
+                                Delete
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <button class="btn btn-primary">Add User</button>
-</form>
-
-
-
- <!-- Users table -->
-  <table class="table table-striped table-bordered">
-    <thead class="table-success">
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Gender</th>
-            <th>Consent</th>
-            <th style="width: 120px;">Actions</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        <!-- Loop through all users -->
-         {% for user in users %}
-         <tr>
-            <td> {{ user.full_name }} </td>
-            <td> {{ user.email }} </td>
-            <td> {{ user.phone_number }} </td>
-            <td> {{ user.gender }} </td>
-            <td> {{ "Yes" if user.consent_given else "No" }} </td>
-            <td>
-                <!-- Delete user form -->
-                 {% if session.role == "admin" %}
-                 <form action="{{ url_for('delete_user', id=user.id) }}" method="POST">
-                    <button class="btn btn-danger btn-sm"
-                            onclick="return confirm('Delete this user?');">
-                            Delete
-                    </button>
-                 </form>
-                 {% endif %}
-            </td>
-         </tr>
-         {% endfor %}
-    </tbody>
-  </table>
-  {% endblock %}
+{% endblock %}

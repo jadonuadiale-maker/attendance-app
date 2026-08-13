@@ -6,17 +6,51 @@
 
 {% if summary %}
     {% for id, data in summary.items() %}
-    <div class="card mb-4 p-3">
-        <div class="card-header">
-            <strong>{{ data.group_name }}</strong> — {{ data.session.date }}
+
+    <!-- Card wrapper: adds spacing + consistent layout across devices -->
+    <div class="card mb-4 p-3 dashboard-card">
+
+        <!-- Header: separated visually for hierarchy -->
+        <div class="dashboard-card-header mb-3">
+            <h5 class="mb-1 fw-semibold">{{ data.group_name }}</h5>
+            <small class="text-muted">{{ data.session.date }}</small>
         </div>
 
-        <div class="card-body">
-            <p>Service 1: {{ data.service1 }}</p>
-            <p>Service 2: {{ data.service2 }}</p>
-            <p>Both Services: {{ data.both }}</p>
-            <p><strong>Total: {{ data.total }}</strong></p>
+        <!-- Metrics grid: improves readability + responsive behaviour -->
+        <div class="row g-3 dashboard-metrics">
 
+            <!-- Each metric becomes a small block for hierarchy -->
+            <div class="col-6 col-md-3">
+                <div class="metric-box">
+                    <span class="metric-label">Service 1</span>
+                    <span class="metric-value text-primary">{{ data.service1 }}</span>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="metric-box">
+                    <span class="metric-label">Service 2</span>
+                    <span class="metric-value text-success">{{ data.service2 }}</span>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="metric-box">
+                    <span class="metric-label">Both</span>
+                    <span class="metric-value">{{ data.both }}</span>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="metric-box">
+                    <span class="metric-label fw-bold">Total</span>
+                    <span class="metric-value fw-bold">{{ data.total }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance badge: moved to a clear position -->
+        <div class="mt-3">
             {% if data.total >= 20 %}
                 <span class="badge bg-success">High Attendance</span>
             {% elif data.total >= 10 %}
@@ -24,23 +58,25 @@
             {% else %}
                 <span class="badge bg-danger">Low Attendance</span>
             {% endif %}
+        </div>
 
-            <hr>
-
+        <!-- Action buttons: grouped + spaced for clarity -->
+        <div class="dashboard-actions mt-4 d-flex flex-wrap gap-2">
             <a href="{{ url_for('sessions.attendance_view', id=data.session.id) }}"
-            class="btn btn-primary btn-sm">View Attendance</a>
+               class="btn btn-primary btn-sm">View Attendance</a>
 
             <a href="{{ url_for('reports.operations_report',
                                 classgroup_id=data.session.classgroup_id,
                                 date=data.session.date) }}"
-            class="btn btn-secondary btn-sm">Operations Report</a>
+               class="btn btn-secondary btn-sm">Operations Report</a>
 
             <a href="{{ url_for('sessions.checkin_view', id=data.session.id) }}"
-            class="btn btn-success btn-sm">Check-In Pad</a>
+               class="btn btn-success btn-sm">Check-In Pad</a>
         </div>
 
     </div>
     {% endfor %}
+
 {% else %}
     <div class="alert alert-info">No sessions found for today.</div>
 {% endif %}
