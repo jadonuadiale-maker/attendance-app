@@ -136,6 +136,11 @@ def internal_error(e):
     app.logger.error(f"500 error: {e}")  # optional logging
     return render_template("error.html", message="An unexpected error occurred."), 500
 
+# To keep app awake on render using cron job. 
+@app.route("/ping")
+def ping():
+    return "Awake", 200
+
 # APP RUNNER.
 if __name__ == '__main__':
     scheduler.start()
