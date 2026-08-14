@@ -2,26 +2,43 @@
 {% block title %}Session Details{% endblock %}
 
 {% block content %}
-<h1>Session Details</h1>
+<h1 class="mb-4">Session Details</h1>
 
-<table class="table table-bordered">
-  <tr><th>Class Group</th><td>{{ session.classgroup.name }}</td></tr>
-  <tr><th>Date</th><td>{{ session.date }}</td></tr>
-  <tr><th>Topic</th><td>{{ session.topic }}</td></tr>
-  <tr><th>Description</th><td>{{ session.description or "No description provided" }}</td></tr>
-</table>
+<div class="card p-3 mb-4">
+    <table class="table table-bordered mb-0">
+        <tr>
+            <th>Class Group</th>
+            <td>{{ session.classgroup.name }}</td>
+        </tr>
+        <tr>
+            <th>Date</th>
+            <td>{{ session.date }}</td>
+        </tr>
+        <tr>
+            <th>Topic</th>
+            <td>{{ session.topic }}</td>
+        </tr>
+        <tr>
+            <th>Description</th>
+            <td>{{ session.description or "No description provided" }}</td>
+        </tr>
+    </table>
+</div>
 
-<a href="{{ url_for('sessions.attendance_view', id=session.id) }}"
-   class="btn btn-primary">Attendance</a>
+<!-- Action Buttons -->
+<div class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('sessions.attendance_view', id=session.id) }}"
+       class="btn btn-primary btn-sm">Attendance</a>
 
-<a href="{{ url_for('reports.operations_report',
-                    classgroup_id=session.classgroup_id,
-                    date=session.date) }}"
-   class="btn btn-secondary">Operations Report</a>
+    <a href="{{ url_for('reports.operations_report',
+                        classgroup_id=session.classgroup_id,
+                        date=session.date) }}"
+       class="btn btn-secondary btn-sm">Operations Report</a>
 
-<a href="{{ url_for('sessions.checkin_view', id=session.id) }}"
-   class="btn btn-success">Check-In Pad</a>
+    <a href="{{ url_for('sessions.checkin_view', id=session.id) }}"
+       class="btn btn-success btn-sm">Check-In Pad</a>
 
-<a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark">Back</a>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark btn-sm">Back</a>
+</div>
 
 {% endblock %}

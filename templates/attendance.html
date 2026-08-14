@@ -1,51 +1,54 @@
 {% extends "base.html" %}
-
 {% block title %}Attendance Records{% endblock %}
 
 {% block content %}
-<!-- Page heading -->
 <h1 class="mb-4">Attendance Records</h1>
 
-<!-- Mark attendance relative to each session -->
+<!-- Mark attendance by session -->
 {% if session.role in ["admin", "teacher"] %}
-<h4 class="mt-4">Mark Attendance by Session</h4>
+<div class="card p-3 mb-4">
+    <h5 class="mb-3">Mark Attendance by Session</h5>
 
-<div class="d-flex flex-wrap gap-2 mb-2">
-    {% for s in sessions %}
-        <a href="{{ url_for('sessions.attendance_view', id=s.id) }}" class="btn btn-primary">
-            Mark Attendance — {{ s.topic }} ({{ s.date }})  <!-- Change this later to accomodate for specific classgroups -->
-        </a>
-    {% endfor %}
+    <div class="d-flex flex-wrap gap-2">
+        {% for s in sessions %}
+            <a href="{{ url_for('sessions.attendance_view', id=s.id) }}"
+               class="btn btn-primary btn-sm">
+                {{ s.topic }} — {{ s.date }}
+            </a>
+        {% endfor %}
+    </div>
 </div>
 {% endif %}
 
-
 <!-- Attendance table -->
-<div class="table-responsive">
-    <table class="table table-striped table-bordered">
-        <thead class="table-success">
-            <tr>
-                <th>User</th>
-                <th>Session</th>
-                <th>Date</th>
-                <th>Service</th>
-                <th>Status</th>
-            </tr>
-        </thead>
+<div class="card p-3">
+    <h5 class="mb-3">All Attendance Records</h5>
 
-        <tbody>
-            <!-- Loop through attendance records -->
-            {% for record in records %}
-            <tr>
-                <!-- Display related user, session, date, and service number -->
-                <td>{{ record.user.full_name }}</td>
-                <td>{{ record.session.topic }}</td>
-                <td>{{ record.date }}</td>
-                <td>{{ record.service_number }}</td>
-                <td>{{ record.status }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered attendance-table">
+            <thead class="table-success">
+                <tr>
+                    <th>User</th>
+                    <th>Session</th>
+                    <th>Date</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.user.full_name }}</td>
+                    <td>{{ record.session.topic }}</td>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.service_number }}</td>
+                    <td>{{ record.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
 {% endblock %}
